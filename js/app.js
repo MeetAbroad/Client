@@ -10,16 +10,21 @@
                 .state('index', {
                     url: '/index',
                     templateUrl: './index-guest.html',
-                    controller: 'HomeController'
+                    controller: 'GuestController'
                 })
                 .state('login', {
                     url: '/login',
                     templateUrl: './login.html',
-                    controller: 'UserController',
+                    controller: 'GuestController',
                 })
                 .state('register', {
                     url: '/register',
                     templateUrl: './register.html',
+                    controller: 'GuestController',
+                })
+                .state('interests', {
+                    url: '/interests',
+                    templateUrl: './interests.html',
                     controller: 'UserController',
                 });
 
@@ -31,7 +36,13 @@
 
     }]);
 
-    app.controller('UserController', ['$scope', '$http', function($scope, $http) {
+    app.controller('GuestController', ['$scope', '$http', function($scope, $http) {
 
+    }]);
+
+    app.controller('UserController', ['$scope', '$http', function($scope, $http) {
+        $http.get('http://localhost:3000/interests').success(function(data){
+            $scope.interests = data;
+        })
     }]);
 })();
