@@ -41,7 +41,7 @@
     }]);
 
     app.controller('UserController', ['$scope', '$http', function($scope, $http) {
-        $http.get('http://localhost:3000/interests').success(function(data){
+        $http.get('http://localhost:3000/interests').success(function(data){ // This needs to be modified depending on the server
             $scope.interests = data;
         })
     }]);
