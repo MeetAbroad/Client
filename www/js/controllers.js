@@ -10,7 +10,7 @@ angular.module('meetabroad.controllers', [])
   //});
 })
 
-.controller('InterestsController', function($scope, $http) {
+.controller('InterestsController', function($scope, $http, ApiData) {
 	$scope.interests = [];
   
 	$http.get(ApiData.url+'/interests'/*, {

@@ -26,7 +26,7 @@ angular.module('meetabroad', ['ionic', 'meetabroad.controllers'])
   return {
       url : 'http://localhost:3000'
   };
-});
+})
 
 .config(function($stateProvider, $urlRouterProvider) {
   $stateProvider
