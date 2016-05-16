@@ -10,14 +10,30 @@ angular.module('meetabroad.controllers', [])
   //});
 })
 
+.controller('LoginController', function($scope, $state, auth) {
+    $scope.user = {};
+
+    $scope.logIn = function(){
+      auth.logIn($scope.user).error(function(error){
+        $scope.error = error;
+          console.log("error en login");
+          console.log($scope.error);
+      }).then(function(){
+        console.log("todo ha ido OK");
+        $state.go('app.profile');
+      });
+    };
+
+})
+
 .controller('InterestsController', function($scope, $http, ApiData) {
 	$scope.interests = [];
-  
+
 	$http.get(ApiData.url+'/interests'/*, {
 		headers: {Authorization: 'Bearer '+auth.getToken()}
 	}*/).then(function(response){
 		data = response.data;
-		
+
 		$scope.interests = data;
 	});
 })

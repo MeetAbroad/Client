@@ -26,7 +26,61 @@ angular.module('meetabroad', ['ionic', 'meetabroad.controllers'])
   return {
       url : 'http://localhost:3000'
   };
-})
+}).factory('auth', ['$http', '$window', '$location', 'ApiData',function($http, $window, $location, ApiData){
+    var auth = {};
+
+    auth.saveToken = function (token){
+      $window.localStorage['meetabroad-token'] = token;
+    };
+
+    auth.getToken = function (){
+      return $window.localStorage['meetabroad-token'];
+    }
+
+    auth.isLoggedIn = function(){
+      var token = auth.getToken();
+
+      if(token){
+
+        var payload = JSON.parse($window.atob(token.split('.')[1]));
+
+        return payload.exp > Date.now() / 1000;
+      } else {
+        return false;
+      }
+    };
+
+    auth.currentUser = function(){
+      if(auth.isLoggedIn()) {
+        var token = auth.getToken();
+        var payload = JSON.parse($window.atob(token.split('.')[1]));
+
+        return payload.email;
+      }
+    };
+
+    auth.logIn = function(user){
+      return $http.post(ApiData.url+'/login', user).success(function(data){
+        auth.saveToken(data.token);
+        console.log("el token es:");
+        console.log(data.token);
+      });
+    };
+
+    auth.logOut = function(){
+      $window.localStorage.removeItem('meetabroad-token');
+
+      $window.location.reload();
+    };
+
+    auth.getUser = function(){
+      return $http.get(ApiData.url+'/users/'+auth.currentUser(), {
+        headers: {Authorization: 'Bearer '+auth.getToken()}
+      });
+    };
+
+    return auth;
+  }])
 
 .config(function($stateProvider, $urlRouterProvider) {
   $stateProvider
@@ -69,6 +123,15 @@ angular.module('meetabroad', ['ionic', 'meetabroad.controllers'])
 			}
 		}
 	})
+    .state('app.login', {
+      url: '/login',
+      views: {
+        'menuContent': {
+          templateUrl: 'templates/login.html',
+          controller: 'LoginController'
+        }
+      }
+    })
     .state('app.interests', {
 		url: '/interests',
       views: {
@@ -95,5 +158,5 @@ angular.module('meetabroad', ['ionic', 'meetabroad.controllers'])
 		}
 	});
   // if none of the above states are matched, use this as the fallback
-  $urlRouterProvider.otherwise('/app/browse');
+  $urlRouterProvider.otherwise('/app/login');
 });
