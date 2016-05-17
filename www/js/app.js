@@ -98,10 +98,10 @@ angular.module('meetabroad', ['ionic', 'meetabroad.controllers'])
 			templateUrl: 'templates/browse.html'
 			}
 		},
-		onEnter: ['$state', 'auth', function($state, auth){
+		onEnter: function($state, auth){
 			if(!auth.isLoggedIn())
 				$state.go('app.login');
-		}]
+		}
 	})
 	.state('app.search', {
 		url: '/search',
@@ -110,10 +110,10 @@ angular.module('meetabroad', ['ionic', 'meetabroad.controllers'])
 				templateUrl: 'templates/search.html'
 			}
 		},
-		onEnter: ['$state', 'auth', function($state, auth){
+		onEnter: function($state, auth){
 			if(!auth.isLoggedIn())
 				$state.go('app.login');
-		}]
+		}
 	})
 	.state('app.messages', {
 		url: '/messages',
@@ -122,10 +122,10 @@ angular.module('meetabroad', ['ionic', 'meetabroad.controllers'])
 				templateUrl: 'templates/messages.html'
 			}
 		},
-		onEnter: ['$state', 'auth', function($state, auth){
+		onEnter: function($state, auth){
 			if(!auth.isLoggedIn())
 				$state.go('app.login');
-		}]
+		}
 	})
 	.state('app.connections', {
 		url: '/connections',
@@ -134,10 +134,10 @@ angular.module('meetabroad', ['ionic', 'meetabroad.controllers'])
 			templateUrl: 'templates/connections.html'
 			}
 		},
-		onEnter: ['$state', 'auth', function($state, auth){
+		onEnter: function($state, auth){
 			if(!auth.isLoggedIn())
 				$state.go('app.login');
-		}]
+		}
 	})
     .state('app.interests', {
 		url: '/interests',
@@ -147,10 +147,10 @@ angular.module('meetabroad', ['ionic', 'meetabroad.controllers'])
 				controller: 'InterestsController'
 			}
 		},
-		onEnter: ['$state', 'auth', function($state, auth){
+		onEnter: function($state, auth){
 			if(!auth.isLoggedIn())
 				$state.go('app.login');
-		}]
+		}
     })
 	.state('app.options', {
 		url: '/options',
@@ -159,10 +159,10 @@ angular.module('meetabroad', ['ionic', 'meetabroad.controllers'])
 			templateUrl: 'templates/options.html'
 			}
 		},
-		onEnter: ['$state', 'auth', function($state, auth){
+		onEnter: function($state, auth){
 			if(!auth.isLoggedIn())
 				$state.go('app.login');
-		}]
+		}
 	})
 	.state('app.profile', {
 		url: '/profile',
@@ -171,10 +171,10 @@ angular.module('meetabroad', ['ionic', 'meetabroad.controllers'])
 			templateUrl: 'templates/profile.html'
 			}
 		},
-		onEnter: ['$state', 'auth', function($state, auth){
+		onEnter: function($state, auth){
 			if(!auth.isLoggedIn())
 				$state.go('app.login');
-		}]
+		}
 	})
 	
 	/*** Authentication ***/

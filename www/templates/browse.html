@@ -1,6 +1,14 @@
-<ion-view view-title="MeetAbroad">
-  <ion-content>
-    <h1>Browse</h1>
-	<p>This is where future connection suggestions will show in the future.</p>
-  </ion-content>
+<ion-view view-title="Browse">
+	<ion-content>
+		<ion-list ng-controller="BrowseController">
+		  <ion-item ng-repeat="suggestion in suggestions" class="item-thumbnail-left">
+
+			<img ng-src="{{ ApiUrl }}/img/avatar-placeholder.png" ng-if="!suggestion.picture" />
+			<img ng-src="{{ ApiUrl }}/pictures/{{ suggestion.picture }}" ng-if="suggestion.picture!==undefined && suggestion.picture.indexOf('https://') === -1 && suggestion.picture" />
+			<img ng-src="{{ suggestion.picture }}" ng-if="suggestion.picture!==undefined && suggestion.picture.indexOf('https://') !== -1"/>
+			<h2>{{suggestion.firstname}} {{suggestion.lastname}} </h2>
+
+		  </ion-item>
+		</ion-list>
+	</ion-content>
 </ion-view>
