@@ -26,7 +26,9 @@ angular.module('meetabroad', ['ionic', 'meetabroad.controllers'])
   return {
       url : 'http://localhost:3000'
   };
-}).factory('auth', ['$http', '$window', '$location', 'ApiData',function($http, $window, $location, ApiData){
+})
+
+.factory('auth', function($http, $window, $location, ApiData){
     var auth = {};
 
     auth.saveToken = function (token){
@@ -62,15 +64,13 @@ angular.module('meetabroad', ['ionic', 'meetabroad.controllers'])
     auth.logIn = function(user){
       return $http.post(ApiData.url+'/login', user).success(function(data){
         auth.saveToken(data.token);
-        console.log("el token es:");
-        console.log(data.token);
       });
     };
 
     auth.logOut = function(){
       $window.localStorage.removeItem('meetabroad-token');
 
-      $window.location.reload();
+      $window.location.reload(true);
     };
 
     auth.getUser = function(){
@@ -80,7 +80,7 @@ angular.module('meetabroad', ['ionic', 'meetabroad.controllers'])
     };
 
     return auth;
-  }])
+  })
 
 .config(function($stateProvider, $urlRouterProvider) {
   $stateProvider
@@ -97,7 +97,11 @@ angular.module('meetabroad', ['ionic', 'meetabroad.controllers'])
 		'menuContent': {
 			templateUrl: 'templates/browse.html'
 			}
-		}
+		},
+		onEnter: ['$state', 'auth', function($state, auth){
+			if(!auth.isLoggedIn())
+				$state.go('app.login');
+		}]
 	})
 	.state('app.search', {
 		url: '/search',
@@ -105,15 +109,23 @@ angular.module('meetabroad', ['ionic', 'meetabroad.controllers'])
 			'menuContent': {
 				templateUrl: 'templates/search.html'
 			}
-		}
+		},
+		onEnter: ['$state', 'auth', function($state, auth){
+			if(!auth.isLoggedIn())
+				$state.go('app.login');
+		}]
 	})
 	.state('app.messages', {
 		url: '/messages',
 		views: {
 		'menuContent': {
-			templateUrl: 'templates/messages.html'
+				templateUrl: 'templates/messages.html'
 			}
-		}
+		},
+		onEnter: ['$state', 'auth', function($state, auth){
+			if(!auth.isLoggedIn())
+				$state.go('app.login');
+		}]
 	})
 	.state('app.connections', {
 		url: '/connections',
@@ -121,25 +133,24 @@ angular.module('meetabroad', ['ionic', 'meetabroad.controllers'])
 		'menuContent': {
 			templateUrl: 'templates/connections.html'
 			}
-		}
+		},
+		onEnter: ['$state', 'auth', function($state, auth){
+			if(!auth.isLoggedIn())
+				$state.go('app.login');
+		}]
 	})
-    .state('app.login', {
-      url: '/login',
-      views: {
-        'menuContent': {
-          templateUrl: 'templates/login.html',
-          controller: 'LoginController'
-        }
-      }
-    })
     .state('app.interests', {
 		url: '/interests',
-      views: {
-        'menuContent': {
-          templateUrl: 'templates/interests.html',
-          controller: 'InterestsController'
-        }
-      }
+		views: {
+			'menuContent': {
+				templateUrl: 'templates/interests.html',
+				controller: 'InterestsController'
+			}
+		},
+		onEnter: ['$state', 'auth', function($state, auth){
+			if(!auth.isLoggedIn())
+				$state.go('app.login');
+		}]
     })
 	.state('app.options', {
 		url: '/options',
@@ -147,7 +158,11 @@ angular.module('meetabroad', ['ionic', 'meetabroad.controllers'])
 		'menuContent': {
 			templateUrl: 'templates/options.html'
 			}
-		}
+		},
+		onEnter: ['$state', 'auth', function($state, auth){
+			if(!auth.isLoggedIn())
+				$state.go('app.login');
+		}]
 	})
 	.state('app.profile', {
 		url: '/profile',
@@ -155,8 +170,28 @@ angular.module('meetabroad', ['ionic', 'meetabroad.controllers'])
 		'menuContent': {
 			templateUrl: 'templates/profile.html'
 			}
+		},
+		onEnter: ['$state', 'auth', function($state, auth){
+			if(!auth.isLoggedIn())
+				$state.go('app.login');
+		}]
+	})
+	
+	/*** Authentication ***/
+	.state('app.login', {
+		url: '/login',
+		views: {
+			'menuContent': {
+			  templateUrl: 'templates/login.html',
+			  controller: 'LoginController'
+			}
+		},
+		onEnter: function($state, auth){
+			if(auth.isLoggedIn())
+				$state.go('app.browse');
 		}
 	});
-  // if none of the above states are matched, use this as the fallback
-  $urlRouterProvider.otherwise('/app/login');
+	
+	// if none of the above states are matched, use this as the fallback
+	$urlRouterProvider.otherwise('/app/login');
 });

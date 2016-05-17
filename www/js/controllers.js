@@ -1,6 +1,9 @@
 angular.module('meetabroad.controllers', [])
 
-.controller('AppCtrl', function($scope, $ionicModal, $timeout) {
+.controller('AppCtrl', function($scope, $ionicModal, $timeout, auth) {
+
+	$scope.logOut = auth.logOut;
+	$scope.loggedIn = auth.isLoggedIn;
 
   // With the new view caching in Ionic, Controllers are only called
   // when they are recreated or on app start, instead of every page change.
@@ -10,17 +13,28 @@ angular.module('meetabroad.controllers', [])
   //});
 })
 
-.controller('LoginController', function($scope, $state, auth) {
+.controller('LoginController', function($scope, $state, auth, $ionicPopup, $timeout, $window) {
     $scope.user = {};
 
+	// An alert dialog
+	var showAlert = function(message) {
+		var alertPopup = $ionicPopup.alert({
+			title: 'Error',
+			template: message,
+		});
+	};
+	
     $scope.logIn = function(){
-      auth.logIn($scope.user).error(function(error){
-        $scope.error = error;
-          console.log("error en login");
-          console.log($scope.error);
+      auth.logIn($scope.user).error(function(data){
+        $scope.error = data;
+
+		showAlert($scope.error.message);
+		  
       }).then(function(){
-        console.log("todo ha ido OK");
-        $state.go('app.profile');
+		  
+		$scope.user = {};
+		
+		$window.location.reload(true);
       });
     };
 

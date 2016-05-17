@@ -18,32 +18,35 @@
     </ion-header-bar>
     <ion-content>
       <ion-list>
-        <ion-item menu-close href="#/app/login">
+        <ion-item menu-close href="#/app/login" ng-hide="loggedIn()">
           Login
         </ion-item>
-        <ion-item menu-close href="#/app/browse">
+		<ion-item menu-close href="#/app/register" ng-hide="loggedIn()">
+          Register
+        </ion-item>
+        <ion-item menu-close href="#/app/browse" ng-show="loggedIn()">
           Browse
         </ion-item>
-		    <ion-item menu-close href="#/app/search">
+		<ion-item menu-close href="#/app/search" ng-show="loggedIn()">
           Search
         </ion-item>
-        <ion-item menu-close href="#/app/messages">
+        <ion-item menu-close href="#/app/messages" ng-show="loggedIn()">
           Messages
         </ion-item>
-		    <ion-item menu-close href="#/app/connections">
+		<ion-item menu-close href="#/app/connections" ng-show="loggedIn()">
           Connections
         </ion-item>
-        <ion-item menu-close href="#/app/interests">
+        <ion-item menu-close href="#/app/interests" ng-show="loggedIn()">
           My Interests
         </ion-item>
-		    <ion-item menu-close href="#/app/options">
+		<ion-item menu-close href="#/app/options" ng-show="loggedIn()">
           My Options
         </ion-item>
-		    <ion-item menu-close href="#/app/profile">
+		<ion-item menu-close href="#/app/profile" ng-show="loggedIn()">
           Profile
         </ion-item>
-		    <ion-item menu-close>
-          Logout
+		<ion-item menu-close ng-click="logOut();" ng-show="loggedIn()">
+			Logout
         </ion-item>
       </ion-list>
     </ion-content>
