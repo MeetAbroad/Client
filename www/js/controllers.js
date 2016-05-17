@@ -1,6 +1,6 @@
 angular.module('meetabroad.controllers', [])
 
-.controller('AppCtrl', function($scope, $ionicPopup, $timeout, auth, ApiData) {
+.controller('AppCtrl', function($scope, $ionicPopup, $timeout, auth, ApiData, $state) {
 
 	$scope.logOut = auth.logOut;
 	$scope.loggedIn = auth.isLoggedIn;
@@ -13,6 +13,10 @@ angular.module('meetabroad.controllers', [])
 			title: 'Error',
 			template: message,
 		});
+	};
+	
+	$scope.toProfile = function(id) {
+		$state.go('app.profile',{id: id});
 	};
 
   // With the new view caching in Ionic, Controllers are only called
@@ -53,13 +57,29 @@ angular.module('meetabroad.controllers', [])
 	});
 })
 
+.controller('ProfileController', function($scope, $http, ApiData, $stateParams) {
+	
+	$scope.profile = {};
+	
+	$http.get(ApiData.url+'/users/profile/' + $stateParams.id).then(function(res){
+		$scope.profile = res.data;
+	});
+})
+
+.controller('MyProfileController', function($scope, $http, ApiData, auth) {
+	
+	$scope.profile = {};
+	
+	$http.get(ApiData.url+'/users/' + auth.currentUser()).then(function(res){
+		$scope.profile = res.data;
+	});
+})
+
 .controller('BrowseController', function($scope, $http, ApiData, auth) {
 	$scope.suggestions = [];
 	
-	$scope.loadSuggestions = function(u){
+	$scope.loadSuggestions = function(user){
 		
-		var u = user;
-
 		// Make suggestions available to the whole app
 		$http.get(ApiData.url+'/users/destinationcity/'+user.destinationcountry+'/'+user.destinationcity, {
 			headers: {Authorization: 'Bearer '+auth.getToken()}

@@ -165,10 +165,24 @@ angular.module('meetabroad', ['ionic', 'meetabroad.controllers'])
 		}
 	})
 	.state('app.profile', {
+		url: '/profile/:id',
+		views: {
+		'menuContent': {
+			templateUrl: 'templates/profile.html',
+			controller: 'ProfileController'
+			}
+		},
+		onEnter: function($state, auth){
+			if(!auth.isLoggedIn())
+				$state.go('app.login');
+		}
+	})
+	.state('app.myprofile', {
 		url: '/profile',
 		views: {
 		'menuContent': {
-			templateUrl: 'templates/profile.html'
+			templateUrl: 'templates/profile.html',
+			controller: 'MyProfileController'
 			}
 		},
 		onEnter: function($state, auth){

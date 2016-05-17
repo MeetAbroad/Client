@@ -1,5 +1,20 @@
 <ion-view view-title="Profile">
   <ion-content>
-    <h1>Profile</h1>
+	<div class="card">
+		<div class="item item-text-wrap item-thumbnail-left">
+			<img ng-src="{{ ApiUrl }}/{{ profile.picture }}" class="img-responsive" />
+			<h2 class="list-fullname">{{profile.firstname}} {{profile.lastname}}</h2>
+			<p>{{ profile.age }} years old</p>
+			<p>{{ profile.gender }}</p>
+		</div>
+		<div class="item item-icon-left">
+			<i class="icon ion-home"></i>
+			{{ profile.origincountry }} - {{ profile.origincity }}
+		</div>
+		<div class="item item-icon-left">
+			<i class="icon ion-plane"></i>
+			{{ profile.destinationcountry }} - {{ profile.destinationcity }}
+		</div>
+	</div>
   </ion-content>
 </ion-view>

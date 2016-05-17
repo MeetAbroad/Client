@@ -2,4 +2,5 @@
 h2.list-fullname {
   white-space: normal;
   height: 2.5em;
+  cursor: pointer;
 }
