@@ -2,7 +2,8 @@
   <ion-content>
 	<div class="card">
 		<div class="item item-text-wrap item-thumbnail-left">
-			<img ng-src="{{ ApiUrl }}/{{ profile.picture }}" class="img-responsive" />
+			<img ng-src="{{ profile.picture }}" ng-if="profile.picture.indexOf('https://') !== -1" class="img-responsive" />
+			<img ng-src="{{ ApiUrl }}/{{ profile.picture }}" ng-if="profile.picture.indexOf('https://') === -1" class="img-responsive" />
 			<h2 class="list-fullname">{{profile.firstname}} {{profile.lastname}}</h2>
 			<p>{{ profile.age }} years old</p>
 			<p>{{ profile.gender }}</p>
