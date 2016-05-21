@@ -4,7 +4,7 @@
 // 'meetabroad' is the name of this angular module example (also set in a <body> attribute in index.html)
 // the 2nd parameter is an array of 'requires'
 // 'meetabroad.controllers' is found in controllers.js
-angular.module('meetabroad', ['ionic', 'meetabroad.controllers'])
+angular.module('meetabroad', ['ionic', 'meetabroad.controllers', 'jett.ionic.filter.bar'])
 
 .run(function($ionicPlatform) {
   $ionicPlatform.ready(function() {
@@ -119,7 +119,8 @@ angular.module('meetabroad', ['ionic', 'meetabroad.controllers'])
 		url: '/messages',
 		views: {
 		'menuContent': {
-				templateUrl: 'templates/messages.html'
+				templateUrl: 'templates/messages/write-message.html',
+        controller: 'MessageController'
 			}
 		},
 		onEnter: function($state, auth){
@@ -190,7 +191,7 @@ angular.module('meetabroad', ['ionic', 'meetabroad.controllers'])
 				$state.go('app.login');
 		}
 	})
-	
+
 	/*** Authentication ***/
 	.state('app.login', {
 		url: '/login',
@@ -205,7 +206,7 @@ angular.module('meetabroad', ['ionic', 'meetabroad.controllers'])
 				$state.go('app.browse');
 		}
 	});
-	
+
 	// if none of the above states are matched, use this as the fallback
 	$urlRouterProvider.otherwise('/app/login');
 });
