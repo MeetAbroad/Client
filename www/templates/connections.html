@@ -1,6 +1,18 @@
 <ion-view view-title="Connections">
-  <ion-content>
-    <h1>Connections</h1>
-	<p>This is where the pending connections list will show up.</p>
+
+  <ion-nav-buttons side="secondary">
+    <button class="button button-icon icon ion-ios-search-strong" ng-click="showFilterBar()">
+    </button>
+  </ion-nav-buttons>
+
+  <ion-content padding='true'>
+
+    <ion-list>
+      <ion-item ng-repeat="connection in connections">
+        <h2>{{connection.firstname}} {{connection.lastname}}</h2>
+      </ion-item>
+    </ion-list>
+
   </ion-content>
+
 </ion-view>
