@@ -32,8 +32,8 @@
         <ion-item menu-close href="#/app/messages" ng-show="loggedIn()">
           Messages
         </ion-item>
-		<ion-item menu-close href="#/app/connections" ng-show="loggedIn()">
-          Connections
+		<ion-item menu-close href="#/app/connections" ng-show="loggedIn()" class="item-icon-right">
+          Connections <span ng-if="notifications>0">({{ notifications }})</span>
         </ion-item>
         <ion-item menu-close href="#/app/interests" ng-show="loggedIn()">
           My Interests

@@ -10,18 +10,15 @@
 		  </label>
 		</div>
 		<ion-list>
-			<div class="padding" ng-if="interests.length!==0">
-				<button class="button button-outline button-block button-positive" ng-click="updateInterests()">Save</button>
-			</div>
 			<ion-item ng-repeat="interest in interests | orderBy:'title' | filter:searchText" ng-if="interests.length!==0">
 				<ion-checkbox ng-checked="myInterest(interest);" ng-model="selected[interest.codename]">{{interest.title}}<p style="white-space: normal">{{interest.description}}</p></ion-checkbox>
 			</ion-item>
 			<ion-item ng-if="interests.length===0">
 				No interests available at this time.
 			</ion-item>
-			<div class="padding" ng-if="interests.length!==0">
-				<button class="button button-outline button-block button-positive" ng-click="updateInterests()">Save</button>
-			</div>
 		</ion-list>
 	</ion-content>
+	<div class="bar bar-footer bar-stable" ng-if="interests.length!==0">
+		<button class="button button-positive" ng-click="updateInterests()" style="width: 100%">Save</button>
+	</div>
 </ion-view>

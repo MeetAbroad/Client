@@ -1,23 +1,29 @@
 <ion-view view-title="Browse" ng-controller="BrowseController">
 	<ion-content>
-		<ion-refresher pulling-text="Pull to refresh..." on-refresh="loadSuggestions(user)">
+		<ion-refresher pulling-text="Pull to refresh..." on-refresh="refreshSuggestions(user)">
         </ion-refresher>
 		<ion-list>
 		  <ion-item ng-repeat="suggestion in suggestions" class="item-thumbnail-left item-icon-right" ng-if="suggestions.length!==0">
-			<img ng-click="toProfile(suggestion._id)" ng-src="{{ ApiUrl }}/img/avatar-placeholder.png" ng-if="!suggestion.picture" />
-			<img ng-click="toProfile(suggestion._id)" ng-src="{{ ApiUrl }}/pictures/{{ suggestion.picture }}" ng-if="suggestion.picture!==undefined && suggestion.picture.indexOf('https://') === -1 && suggestion.picture" />
-			<img ng-click="toProfile(suggestion._id)" ng-src="{{ suggestion.picture }}" ng-if="suggestion.picture!==undefined && suggestion.picture.indexOf('https://') !== -1"/>
-			<h2 class="list-fullname" ng-click="toProfile(suggestion._id)">{{suggestion.firstname}} {{suggestion.lastname}}</h2>
-			<p><i class="ion-home"></i> {{ suggestion.origincountry }} - {{ suggestion.origincity }}</p>
-			<p><i class="ion-plane"></i> {{ suggestion.destinationcountry }} - {{ suggestion.destinationcity }}</p>
-			
-			<a ng-click="sendRequest(suggestion._id, $index)" ng-hide="suggestion.loading"><i class="icon ion-plus-circled active"></i></a>
-			<a ng-if="suggestion.loading === 2"><i class="icon ion-checkmark-circled balanced"></i></a>
-			<ion-spinner ng-if="suggestion.loading === 1" class="icon"></ion-spinner>
+        <img ng-click="toProfile(suggestion._id)" ng-src="{{ ApiUrl }}/img/avatar-placeholder.png" ng-if="!suggestion.picture" />
+        <img ng-click="toProfile(suggestion._id)" ng-src="{{ ApiUrl }}/pictures/{{ suggestion.picture }}" ng-if="suggestion.picture!==undefined && suggestion.picture.indexOf('https://') === -1 && suggestion.picture" />
+        <img ng-click="toProfile(suggestion._id)" ng-src="{{ suggestion.picture }}" ng-if="suggestion.picture!==undefined && suggestion.picture.indexOf('https://') !== -1"/>
+        <h2 class="list-fullname" ng-click="toProfile(suggestion._id)">{{suggestion.firstname}} {{suggestion.lastname}}</h2>
+        <p><i class="ion-home"></i> {{ suggestion.origincountry }} - {{ suggestion.origincity }}</p>
+        <p><i class="ion-plane"></i> {{ suggestion.destinationcountry }} - {{ suggestion.destinationcity }}</p>
+
+        <a ng-click="sendRequest(suggestion._id, $index)" ng-hide="suggestion.loading"><i class="icon ion-plus-circled active"></i></a>
+        <a ng-if="suggestion.loading === 2"><i class="icon ion-checkmark-circled balanced"></i></a>
+        <ion-spinner ng-if="suggestion.loading === 1" class="icon"></ion-spinner>
 		  </ion-item>
 		  <ion-item ng-if="suggestions.length===0">
-			No suggestions available for your account.
+			  No suggestions available for your account.
 		  </ion-item>
+		  <div style='clear: both;'></div>
 		</ion-list>
+		<ion-infinite-scroll
+          on-infinite="loadMoreSuggestions(user)"
+          distance="1%"
+		  immediate-check="false" ng-if="hasMoreData">
+        </ion-infinite-scroll>
 	</ion-content>
 </ion-view>

@@ -1,256 +1,289 @@
 angular.module('meetabroad.controllers', [])
 
-.controller('AppCtrl', function($scope, $ionicPopup, $timeout, auth, ApiData, $state, $ionicFilterBar) {
+  .controller('AppCtrl', function($scope, $ionicPopup, $timeout, auth, ApiData, $state, $ionicFilterBar, NotificationService) {
 
-	$scope.logOut = auth.logOut;
-	$scope.loggedIn = auth.isLoggedIn;
+    $scope.logOut = auth.logOut;
+    $scope.loggedIn = auth.isLoggedIn;
 
-	$scope.ApiUrl = ApiData.url;
+    $scope.ApiUrl = ApiData.url;
 
-	// An alert dialog
-	$scope.showAlert = function(title, message) {
-		var alertPopup = $ionicPopup.alert({
-			title: title,
-			template: message,
-		});
-	};
+    // An alert dialog
+    $scope.showAlert = function(title, message) {
+      var alertPopup = $ionicPopup.alert({
+        title: title,
+        template: message,
+      });
+    };
 
-	$scope.toProfile = function(id) {
-		$state.go('app.profile',{id: id});
-	};
+    $scope.toProfile = function(id) {
+      $state.go('app.profile',{id: id});
+    };
 
-  // With the new view caching in Ionic, Controllers are only called
-  // when they are recreated or on app start, instead of every page change.
-  // To listen for when this page is active (for example, to refresh data),
-  // listen for the $ionicView.enter event:
-  //$scope.$on('$ionicView.enter', function(e) {
-  //});
-})
+    $scope.refreshNotifications = function() {
+      NotificationService.load().then(function (response) {
+        $scope.notifications = response;
+      });
+    };
+    $scope.refreshNotifications();
 
-.controller('LoginController', function($scope, $state, auth, $window) {
+    // With the new view caching in Ionic, Controllers are only called
+    // when they are recreated or on app start, instead of every page change.
+    // To listen for when this page is active (for example, to refresh data),
+    // listen for the $ionicView.enter event:
+    //$scope.$on('$ionicView.enter', function(e) {
+    //});
+  })
+
+  .controller('LoginController', function($scope, $state, auth, $window) {
     $scope.user = {};
 
     $scope.logIn = function(){
       auth.logIn($scope.user).error(function(data){
         $scope.error = data;
 
-		$scope.showAlert('Error', $scope.error.message);
+        $scope.showAlert('Error', $scope.error.message);
 
       }).then(function(){
 
-		$scope.user = {};
+        $scope.user = {};
 
-		$window.location.reload(true);
+        $window.location.reload(true);
       });
     };
-})
+  })
 
-.controller('InterestsController', function($scope, $http, ApiData, auth) {
-	$scope.interests = [];
+  .controller('InterestsController', function($scope, $http, ApiData, auth) {
+    $scope.interests = [];
 
-	/*$http.get(ApiData.url+'/interests', {
-		headers: {Authorization: 'Bearer '+auth.getToken()}
-	}).then(function(response){
-		data = response.data;
+    /*$http.get(ApiData.url+'/interests', {
+     headers: {Authorization: 'Bearer '+auth.getToken()}
+     }).then(function(response){
+     data = response.data;
+     $scope.interests = data;
+     });*/
 
-		$scope.interests = data;
-	});*/
+    $scope.refreshInterests = function(){
 
-	$scope.refreshInterests = function(){
+      $scope.selected = {};
 
-		$scope.selected = {};
+      // All interests
+      $http.get(ApiData.url+'/interests').then(function(response){
+        data = response.data;
 
-		// All interests
-		$http.get(ApiData.url+'/interests').then(function(response){
-			data = response.data;
+        $scope.interests = data;
+      });
 
-			$scope.interests = data;
-		});
+      // Our interests
+      $http.get(ApiData.url+'/interests/'+auth.currentUser(), {
+        headers: {Authorization: 'Bearer '+auth.getToken()}
+      }).then(function(response){
+        data = response.data;
 
-		// Our interests
-		$http.get(ApiData.url+'/interests/'+auth.currentUser(), {
-			headers: {Authorization: 'Bearer '+auth.getToken()}
-		}).then(function(response){
-			data = response.data;
+        $scope.myinterests = data;
 
-			$scope.myinterests = data;
+        // Update our 'selected' array
+        var i;
+        for(i=0; i<$scope.myinterests.length; i++)
+        {
+          $scope.selected[$scope.myinterests[i].codename] = true;
+        }
+      });
+    };
 
-			// Update our 'selected' array
-			var i;
-			for(i=0; i<$scope.myinterests.length; i++)
-			{
-				$scope.selected[$scope.myinterests[i].codename] = true;
-			}
-		});
-	};
+    $scope.refreshInterests();
 
-	$scope.refreshInterests();
+    // Check if it's in our interest list
+    $scope.myInterest = function(interest){
+      // If in array, then return true
+      var i;
+      for(i=0; i<this.myinterests.length; i++)
+      {
+        if (this.myinterests[i].codename == interest.codename)
+        {
+          return true;
+        }
+      }
 
-	// Check if it's in our interest list
-	$scope.myInterest = function(interest){
-		// If in array, then return true
-		var i;
-		for(i=0; i<this.myinterests.length; i++)
-		{
-			if (this.myinterests[i].codename == interest.codename)
-			{
-				return true;
-			}
-		}
+      return false;
+    };
 
-		return false;
-	};
+    $scope.interestId = function(codename){
 
-	$scope.interestId = function(codename){
+      // If in array, then return true
+      var i;
+      for(i=0; i<this.interests.length; i++)
+      {
+        if (this.interests[i].codename == codename)
+        {
+          return this.interests[i]._id;
+        }
+      }
 
-		// If in array, then return true
-		var i;
-		for(i=0; i<this.interests.length; i++)
-		{
-			if (this.interests[i].codename == codename)
-			{
-				return this.interests[i]._id;
-			}
-		}
+      return false;
+    };
 
-		return false;
-	};
+    // Update our interests
+    $scope.updateInterests = function(){
 
-	// Update our interests
-	$scope.updateInterests = function(){
+      var myinterests = [];
 
-		var myinterests = [];
+      angular.forEach($scope.selected, function(value, key) {
 
-		angular.forEach($scope.selected, function(value, key) {
+        if(value == true)
+          myinterests.push($scope.interestId(key)); // store the _id
+      });
 
-			if(value == true)
-				myinterests.push($scope.interestId(key)); // store the _id
-		});
+      $http.post(ApiData.url+'/interests/update', {interests: myinterests}, {
+        headers: {Authorization: 'Bearer '+auth.getToken()}
+      }).then(function(response){
+        data = response.data;
 
-		$http.post(ApiData.url+'/interests/update', {interests: myinterests}, {
-			headers: {Authorization: 'Bearer '+auth.getToken()}
-		}).then(function(response){
-			data = response.data;
+        // Refresh interests
+        $scope.refreshInterests();
 
-			// Refresh interests
-			$scope.refreshInterests();
+        $scope.showAlert('Updated', data.message);
+      }, function(response){
+        data = response.data;
 
-			$scope.showAlert('Updated', data.message);
-		}, function(response){
-			data = response.data;
+        $scope.showAlert('Error', data);
+      });
+    };
+  })
 
-			$scope.showAlert('Error', data);
-		});
-	};
-})
+  .controller('ProfileController', function($scope, $http, ApiData, $stateParams) {
 
-.controller('ProfileController', function($scope, $http, ApiData, $stateParams) {
+    $scope.profile = {};
 
-	$scope.profile = {};
+    $http.get(ApiData.url+'/users/profile/' + $stateParams.id).then(function(res){
+      $scope.profile = res.data;
+    });
+  })
 
-	$http.get(ApiData.url+'/users/profile/' + $stateParams.id).then(function(res){
-		$scope.profile = res.data;
-	});
-})
+  .controller('MyProfileController', function($scope, $http, ApiData, auth) {
 
-.controller('MyProfileController', function($scope, $http, ApiData, auth) {
+    $scope.profile = {};
 
-	$scope.profile = {};
+    $http.get(ApiData.url+'/users/' + auth.currentUser()).then(function(res){
+      $scope.profile = res.data;
+    });
+  })
 
-	$http.get(ApiData.url+'/users/' + auth.currentUser()).then(function(res){
-		$scope.profile = res.data;
-	});
-})
+  .controller('BrowseController', function($scope, $http, ApiData, auth) {
+    $scope.suggestions = [];
 
-.controller('BrowseController', function($scope, $http, ApiData, auth) {
-	$scope.suggestions = [];
+    $scope.hasMoreData = true;
 
-	$scope.loadSuggestions = function(user){
+    function loadSuggestions(params, callback){
 
-		// Make suggestions available to the whole app
-		$http.get(ApiData.url+'/users/destinationcity/'+user.destinationcountry+'/'+user.destinationcity, {
-			headers: {Authorization: 'Bearer '+auth.getToken()}
-		}).then(function(response){
+      var user = params['user'];
 
-			suggestions = response.data;
+      var data = '';
+      if(params['notin'].length > 0)
+      {
+        var ampersand = '';
+        for (var i=0; i < params['notin'].length; i++) {
+          data += ampersand+'notin[]='+params['notin'][i];
+          ampersand = '&';
+        }
+      }
 
-			////// IMPORTANT: TODO this should probably be on the server-side...but meh...
+      $http({
+        url: ApiData.url+'/users/destinationcity/'+user.destinationcountry+'/'+user.destinationcity+'?'+data,
+        method: 'GET',
+        headers: {Authorization: 'Bearer '+auth.getToken()}
+      }).then(function(response){
 
-			// Now get our connections so we can remove those users from this list
-			$http.get(ApiData.url+'/connections/'+user._id, {
-				headers: {Authorization: 'Bearer '+auth.getToken()}
-			}).then(function successCallback(response){
+        suggestions = response.data;
 
-
-					var connections = response.data;
-
-					// Remove them
-					for (var i = suggestions.length - 1; i >= 0; i--) {
-						var s = suggestions[i];
-						s.loading = false;
-
-						for (var j = connections.length - 1; j >= 0; j--) {
-							var c = connections[j];
-
-							if(
-								(s._id == c.uid1 && c.uid2 == user._id)
-								||
-								(s._id == c.uid2 && c.uid1 == user._id)
-							)
-							{
-								suggestions.splice(i, 1);
-								break;
-							}
-						}
-					}
-
-					// We have our results now
-					$scope.suggestions = suggestions;
-					$scope.$broadcast('scroll.refreshComplete');
-
-				}, function errorCallback(response){
-					// We have our results already
-					$scope.suggestions = suggestions;
-					$scope.$broadcast('scroll.refreshComplete');
-				}
-			);
-		});
+        // We have our results now
+        callback(suggestions);
+      },function(response){
+        // Nothing to retreive I suppose. ("no results found")
+        callback(null);
+      });
     }
 
-	auth.getUser().then(function(response){
+    $scope.refreshSuggestions = function(user){
+      var params = {};
 
-		user = response.data;
-		$scope.user = user;
+      params['user'] = user;
+      params['notin'] = [];
 
-		$scope.loadSuggestions(user);
+      loadSuggestions(params, function(suggestions){
+        if(suggestions !== null)
+        {
+          $scope.hasMoreData = true;
+          $scope.suggestions = suggestions;
+        }
+        else
+          $scope.hasMoreData = false;
+        $scope.$broadcast('scroll.refreshComplete');
+      });
+    }
 
-		// Send request
-		$scope.sendRequest = function(id, index){
+    $scope.loadMoreSuggestions = function(user){
+      var params = {};
 
-			$scope.suggestions[index].loading = 1;
+      params['user'] = user;
 
-			$http.post(ApiData.url+'/connections/new/'+id, user, {
-				headers: {Authorization: 'Bearer '+auth.getToken()}
-			}).then(function successCallback(response) {
-				data = response.data;
+      // Get the IDs of the existing suggestions into an array
+      var ids = [];
+      for (var i = $scope.suggestions.length - 1; i >= 0; i--) {
+        ids.push($scope.suggestions[i]._id);
+      }
 
-				$scope.suggestions[index].loading = 2;
+      params['notin'] = ids;
 
-			}, function errorCallback(response) {
-				data = response.data;
+      loadSuggestions(params, function(suggestions){
+        if(suggestions !== null)
+        {
+          $scope.hasMoreData = true;
+          $scope.suggestions = $scope.suggestions.concat(suggestions);
+        }
+        else
+          $scope.hasMoreData = false;
 
-				$scope.showAlert('Error', data);
+        $scope.$broadcast('scroll.infiniteScrollComplete');
+      });
+    }
 
-				$scope.suggestions[index].loading = 0;
-			});
-		};
-	});
-})
-.controller('MessageController', function($scope, $http, ApiData, auth, $ionicFilterBar) {
- 
+    auth.getUser().then(function(response){
 
-})
-.controller('WriteMessageController', function($scope, $http, ApiData, auth, $ionicFilterBar) {
+      user = response.data;
+      $scope.user = user;
+
+      var params = {};
+      params['user'] = user;
+      params['notin'] = [];
+
+      loadSuggestions(params, function(suggestions){
+        if(suggestions !== null)
+          $scope.suggestions = $scope.suggestions.concat(suggestions);
+      });
+
+      // Send request
+      $scope.sendRequest = function(id, index){
+
+        $scope.suggestions[index].loading = 1;
+
+        $http.post(ApiData.url+'/connections/new/'+id, user, {
+          headers: {Authorization: 'Bearer '+auth.getToken()}
+        }).then(function successCallback(response) {
+          data = response.data;
+
+          $scope.suggestions[index].loading = 2;
+
+        }, function errorCallback(response) {
+          data = response.data;
+
+          $scope.showAlert('Error', data);
+
+          $scope.suggestions[index].loading = 0;
+        });
+      };
+    });
+  })
+  .controller('MessageController', function($scope, $http, ApiData, auth, $ionicFilterBar) {
     //$scope.places = [{name:'New York'}, {name: 'London'}, {name: 'Milan'}, {name:'Paris'}];
     $scope.connections = [];
 
@@ -302,8 +335,8 @@ angular.module('meetabroad.controllers', [])
     // /profile/:id
 
   })
-.controller('ConnectionsController', function($scope, $http, ApiData, auth, $ionicFilterBar) {
-
+  .controller('WriteMessageController', function($scope, $http, ApiData, auth, $ionicFilterBar) {
+    //$scope.places = [{name:'New York'}, {name: 'London'}, {name: 'Milan'}, {name:'Paris'}];
     $scope.connections = [];
 
     $scope.showFilterBar = function () {
@@ -350,4 +383,136 @@ angular.module('meetabroad.controllers', [])
 
     });
 
+
+    // /profile/:id
+
   })
+  .controller('ConnectionsController', function($scope, $http, ApiData, auth, $ionicFilterBar, NotificationService, $state) {
+
+    $scope.connections = [];
+
+    $scope.$on('$ionicView.enter', function(e) {
+      // Refresh every time we enter this view
+      auth.getUser().then(function successCallback(response) {
+        var user = response.data;
+
+        $scope.refreshConnections = function(){
+          $http.get(ApiData.url+'/connections/established/'+user._id, {
+            headers: {Authorization: 'Bearer '+auth.getToken()}
+          }).then(function(response) {
+            data = response.data;
+
+            $scope.connections = [];
+
+            // Go through each connection and push it to the connections array, properly.
+            angular.forEach(data, function(value, key) {
+
+              value.uid1.connectionid = value._id; // otherwise it gets lost when we push uid1 or uid2
+              value.uid2.connectionid = value._id; // otherwise it gets lost when we push uid1 or uid2
+
+              if(value.uid1._id != user._id)
+              {
+                // If uid1 is not us, then we want this one
+                $scope.connections.push(value.uid1);
+              }
+              else
+              {
+                // Otherwise we want uid2
+                $scope.connections.push(value.uid2);
+              }
+            });
+          }, function(response){
+            // Error -> let's assume it's empty
+            $scope.connections = [];
+          });
+        }
+        $scope.refreshConnections();
+
+        // Delete connection
+        $scope.deleteConnection = function(id){
+
+          $http.post(ApiData.url+'/connections/delete/'+id, user, {
+            headers: {Authorization: 'Bearer '+auth.getToken()}
+          }).then(function successCallback(response) {
+            data = response.data;
+
+            $scope.showAlert('Success', data);
+
+            $scope.refreshConnections();
+          }, function errorCallback(response) {
+            data = response.data;
+            $scope.showAlert('Error rejecting', data);
+          });
+        };
+      });
+    });
+
+    $scope.showFilterBar = function () {
+      var filterBarInstance = $ionicFilterBar.show({
+        cancelText: "Cancel",
+        items: $scope.connections,
+        update: function (filteredItems, filterText) {
+          $scope.connections = filteredItems;
+        }
+      });
+    };
+  })
+  .controller('ConnectionsPendingController', function($scope, $http, ApiData, auth, NotificationService) {
+
+    // Get user
+    auth.getUser().then(function successCallback(response) {
+      $scope.user = response.data;
+      $scope.total = 0;
+
+      function refreshRequests() {
+        $scope.total = 0;
+        $scope.connections = [];
+
+        $http.get(ApiData.url + '/notifications', {
+          headers: {Authorization: 'Bearer ' + auth.getToken()}
+        }).then(function (response) {
+          data = response.data;
+
+          $scope.connections = data.notifications;
+          $scope.total = data.total;
+        });
+      }
+      refreshRequests();
+
+      // Accept request
+      $scope.acceptRequest = function (id) {
+        $http.post(ApiData.url+'/connections/accept/' + id, $scope.user, {
+          headers: {Authorization: 'Bearer ' + auth.getToken()}
+        }).then(function successCallback(response) {
+          data = response.data;
+
+          $scope.showAlert('Success', data);
+
+          refreshRequests();
+          $scope.refreshNotifications();
+
+        }, function errorCallback(response) {
+          data = response.data;
+          $scope.showAlert('Error accepting', data);
+        });
+      };
+
+      // Reject request
+      $scope.rejectRequest = function (id) {
+        $http.post(ApiData.url+'/connections/reject/' + id, $scope.user, {
+          headers: {Authorization: 'Bearer ' + auth.getToken()}
+        }).then(function successCallback(response) {
+          data = response.data;
+
+          $scope.showAlert('Success', data);
+
+          refreshRequests();
+          $scope.refreshNotifications();
+
+        }, function errorCallback(response) {
+          data = response.data;
+          $scope.showAlert('Error rejecting', data);
+        });
+      };
+    });
+  });

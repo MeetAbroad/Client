@@ -1,18 +1,29 @@
 <ion-view view-title="Connections">
 
   <ion-nav-buttons side="secondary">
-    <button class="button button-icon icon ion-ios-search-strong" ng-click="showFilterBar()">
+    <button class="button button-icon icon ion-search" ng-click="showFilterBar()">
     </button>
   </ion-nav-buttons>
 
   <ion-content padding='true'>
 
     <ion-list>
-      <ion-item ng-repeat="connection in connections">
-        <h2>{{connection.firstname}} {{connection.lastname}}</h2>
+      <ion-item ng-repeat="connection in connections" class="item-thumbnail-left item-icon-right">
+        <img ng-click="toProfile(connection._id)" ng-src="{{ ApiUrl }}/img/avatar-placeholder.png" ng-if="!connection.picture" />
+        <img ng-click="toProfile(connection._id)" ng-src="{{ ApiUrl }}/pictures/{{ connection.picture }}" ng-if="connection.picture!==undefined && connection.picture.indexOf('https://') === -1 && connection.picture" />
+        <img ng-click="toProfile(connection._id)" ng-src="{{ connection.picture }}" ng-if="connection.picture!==undefined && connection.picture.indexOf('https://') !== -1"/>
+        <h2 class="list-fullname" ng-click="toProfile(connection._id)">{{connection.firstname}} {{connection.lastname}}</h2>
+        <p><i class="ion-home"></i> {{ connection.origincountry }} - {{ connection.origincity }}</p>
+        <p><i class="ion-plane"></i> {{ connection.destinationcountry }} - {{ connection.destinationcity }}</p>
+        <ion-option-button class="button-assertive icon-left ion-trash-b" ng-click="deleteConnection(connection.connectionid);">Delete</ion-option-button>
+      </ion-item>
+      <ion-item ng-if="connections.length===0">
+        You have no connections.
       </ion-item>
     </ion-list>
 
   </ion-content>
-
+  <div class="bar bar-footer bar-stable" ng-if="notifications!==0">
+    <a class="button button-energized" href="#/app/connections/pending" style="width: 100%"><i class="icon ion-person-add"></i> You have {{ notifications }} pending requests!</a>
+  </div>
 </ion-view>
