@@ -7,153 +7,153 @@
 angular.module('meetabroad', ['ionic', 'meetabroad.controllers', 'jett.ionic.filter.bar'])
 
 .run(function($ionicPlatform) {
-  $ionicPlatform.ready(function() {
-    // Hide the accessory bar by default (remove this to show the accessory bar above the keyboard
-    // for form inputs)
-    if (window.cordova && window.cordova.plugins.Keyboard) {
-      cordova.plugins.Keyboard.hideKeyboardAccessoryBar(true);
-      cordova.plugins.Keyboard.disableScroll(true);
+	$ionicPlatform.ready(function() {
+		// Hide the accessory bar by default (remove this to show the accessory bar above the keyboard
+		// for form inputs)
+		if (window.cordova && window.cordova.plugins.Keyboard) {
+			cordova.plugins.Keyboard.hideKeyboardAccessoryBar(true);
+			cordova.plugins.Keyboard.disableScroll(true);
 
-    }
-    if (window.StatusBar) {
-      // org.apache.cordova.statusbar required
-      StatusBar.styleDefault();
-    }
-  });
+		}
+		if (window.StatusBar) {
+			// org.apache.cordova.statusbar required
+			StatusBar.styleDefault();
+		}
+	});
 })
 
 .factory('ApiData', function() {
-  return {
-      url : 'http://localhost:3000'
-  };
+	return {
+			url : 'http://localhost:3000'
+	};
 })
 
 .factory('auth', function($http, $window, $location, ApiData){
-    var auth = {};
+		var auth = {};
 
-    auth.saveToken = function (token){
-      $window.localStorage['meetabroad-token'] = token;
-    };
+		auth.saveToken = function (token){
+			$window.localStorage['meetabroad-token'] = token;
+		};
 
-    auth.getToken = function (){
-      return $window.localStorage['meetabroad-token'];
-    }
+		auth.getToken = function (){
+			return $window.localStorage['meetabroad-token'];
+		}
 
-    auth.isLoggedIn = function(){
-      var token = auth.getToken();
+		auth.isLoggedIn = function(){
+			var token = auth.getToken();
 
-      if(token){
+			if(token){
 
-        var payload = JSON.parse($window.atob(token.split('.')[1]));
+				var payload = JSON.parse($window.atob(token.split('.')[1]));
 
-        return payload.exp > Date.now() / 1000;
-      } else {
-        return false;
-      }
-    };
+				return payload.exp > Date.now() / 1000;
+			} else {
+				return false;
+			}
+		};
 
-    auth.currentUser = function(){
-      if(auth.isLoggedIn()) {
-        var token = auth.getToken();
-        var payload = JSON.parse($window.atob(token.split('.')[1]));
+		auth.currentUser = function(){
+			if(auth.isLoggedIn()) {
+				var token = auth.getToken();
+				var payload = JSON.parse($window.atob(token.split('.')[1]));
 
-        return payload.email;
-      }
-    };
+				return payload.email;
+			}
+		};
 
-    auth.logIn = function(user){
-      return $http.post(ApiData.url+'/login', user).success(function(data){
-        auth.saveToken(data.token);
-      });
-    };
+		auth.logIn = function(user){
+			return $http.post(ApiData.url+'/login', user).success(function(data){
+				auth.saveToken(data.token);
+			});
+		};
 
-    auth.logOut = function(){
-      $window.localStorage.removeItem('meetabroad-token');
+		auth.logOut = function(){
+			$window.localStorage.removeItem('meetabroad-token');
 
-      $window.location.reload(true);
-    };
+			$window.location.reload(true);
+		};
 
-    auth.getUser = function(){
-      return $http.get(ApiData.url+'/users/'+auth.currentUser(), {
-        headers: {Authorization: 'Bearer '+auth.getToken()}
-      });
-    };
+		auth.getUser = function(){
+			return $http.get(ApiData.url+'/users/'+auth.currentUser(), {
+				headers: {Authorization: 'Bearer '+auth.getToken()}
+			});
+		};
 
-    return auth;
-  })
+		return auth;
+	})
 
 .config(function($stateProvider, $urlRouterProvider) {
-  $stateProvider
+	$stateProvider
 
-    .state('app', {
-		url: '/app',
-		abstract: true,
-		templateUrl: 'templates/menu.html',
-		controller: 'AppCtrl'
-	})
-	.state('app.browse', {
+  .state('app', {
+    url: '/app',
+    abstract: true,
+    templateUrl: 'templates/menu.html',
+    controller: 'AppCtrl'
+  })
+  .state('app.browse', {
       url: '/browse',
-		views: {
-		'menuContent': {
-			templateUrl: 'templates/browse.html'
-			}
-		},
-		onEnter: function($state, auth){
-			if(!auth.isLoggedIn())
-				$state.go('app.login');
-		}
-	})
-	.state('app.search', {
-		url: '/search',
-		views: {
-			'menuContent': {
-				templateUrl: 'templates/search.html'
-			}
-		},
-		onEnter: function($state, auth){
-			if(!auth.isLoggedIn())
-				$state.go('app.login');
-		}
-	})
-	.state('app.messages', {
-		url: '/messages',
-		views: {
-		'menuContent': {
-				templateUrl: 'templates/messages/write-message.html',
+    views: {
+    'menuContent': {
+      templateUrl: 'templates/browse.html'
+      }
+    },
+    onEnter: function($state, auth){
+      if(!auth.isLoggedIn())
+        $state.go('app.login');
+    }
+  })
+  .state('app.search', {
+    url: '/search',
+    views: {
+      'menuContent': {
+        templateUrl: 'templates/search.html'
+      }
+    },
+    onEnter: function($state, auth){
+      if(!auth.isLoggedIn())
+        $state.go('app.login');
+    }
+  })
+  .state('app.messages', {
+    url: '/messages',
+    views: {
+    'menuContent': {
+        templateUrl: 'templates/messages/write-message.html',
         controller: 'MessageController'
-			}
-		},
-		onEnter: function($state, auth){
-			if(!auth.isLoggedIn())
-				$state.go('app.login');
-		}
-	})
-	.state('app.connections', {
-		url: '/connections',
-		views: {
-		'menuContent': {
-			templateUrl: 'templates/connections.html',
-      controller: 'ConnectionsController'
-			}
-		},
-		onEnter: function($state, auth){
-			if(!auth.isLoggedIn())
-				$state.go('app.login');
-		}
-	})
-    .state('app.interests', {
-		url: '/interests',
-		views: {
-			'menuContent': {
-				templateUrl: 'templates/interests.html',
-				controller: 'InterestsController'
-			}
-		},
-		onEnter: function($state, auth){
-			if(!auth.isLoggedIn())
-				$state.go('app.login');
-		}
-    })
+      }
+    },
+    onEnter: function($state, auth){
+      if(!auth.isLoggedIn())
+        $state.go('app.login');
+    }
+  })
+  .state('app.connections', {
+    url: '/connections',
+    views: {
+      'menuContent': {
+        templateUrl: 'templates/connections.html',
+        controller: 'ConnectionsController'
+      }
+    },
+    onEnter: function($state, auth){
+      if(!auth.isLoggedIn())
+        $state.go('app.login');
+    }
+  })
+  .state('app.interests', {
+    url: '/interests',
+    views: {
+      'menuContent': {
+        templateUrl: 'templates/interests.html',
+        controller: 'InterestsController'
+      }
+    },
+    onEnter: function($state, auth){
+      if(!auth.isLoggedIn())
+        $state.go('app.login');
+    }
+  })
 	.state('app.options', {
 		url: '/options',
 		views: {
@@ -198,8 +198,8 @@ angular.module('meetabroad', ['ionic', 'meetabroad.controllers', 'jett.ionic.fil
 		url: '/login',
 		views: {
 			'menuContent': {
-			  templateUrl: 'templates/login.html',
-			  controller: 'LoginController'
+				templateUrl: 'templates/login.html',
+				controller: 'LoginController'
 			}
 		},
 		onEnter: function($state, auth){

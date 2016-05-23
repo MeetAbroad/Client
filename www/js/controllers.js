@@ -19,30 +19,30 @@ angular.module('meetabroad.controllers', [])
 		$state.go('app.profile',{id: id});
 	};
 
-  // With the new view caching in Ionic, Controllers are only called
-  // when they are recreated or on app start, instead of every page change.
-  // To listen for when this page is active (for example, to refresh data),
-  // listen for the $ionicView.enter event:
-  //$scope.$on('$ionicView.enter', function(e) {
-  //});
+	// With the new view caching in Ionic, Controllers are only called
+	// when they are recreated or on app start, instead of every page change.
+	// To listen for when this page is active (for example, to refresh data),
+	// listen for the $ionicView.enter event:
+	//$scope.$on('$ionicView.enter', function(e) {
+	//});
 })
 
 .controller('LoginController', function($scope, $state, auth, $window) {
-    $scope.user = {};
+		$scope.user = {};
 
-    $scope.logIn = function(){
-      auth.logIn($scope.user).error(function(data){
-        $scope.error = data;
+		$scope.logIn = function(){
+			auth.logIn($scope.user).error(function(data){
+				$scope.error = data;
 
 		$scope.showAlert('Error', $scope.error.message);
 
-      }).then(function(){
+			}).then(function(){
 
 		$scope.user = {};
 
 		$window.location.reload(true);
-      });
-    };
+			});
+		};
 })
 
 .controller('InterestsController', function($scope, $http, ApiData, auth) {
@@ -164,13 +164,13 @@ angular.module('meetabroad.controllers', [])
 
 .controller('BrowseController', function($scope, $http, ApiData, auth) {
 	$scope.suggestions = [];
-	
+
 	$scope.hasMoreData = true;
-	
+
 	function loadSuggestions(params, callback){
-		
+
 		var user = params['user'];
-		
+
 		var data = '';
 		if(params['notin'].length > 0)
 		{
@@ -195,7 +195,7 @@ angular.module('meetabroad.controllers', [])
 			// Nothing to retreive I suppose. ("no results found")
 			callback(null);
 		});
-    }
+		}
 
 	$scope.refreshSuggestions = function(user){
 		var params = {};
@@ -213,19 +213,19 @@ angular.module('meetabroad.controllers', [])
 				$scope.hasMoreData = false;
 			$scope.$broadcast('scroll.refreshComplete');
 		});
-    }
+		}
 
 	$scope.loadMoreSuggestions = function(user){
 		var params = {};
 
 		params['user'] = user;
-		
+
 		// Get the IDs of the existing suggestions into an array
 		var ids = [];
 		for (var i = $scope.suggestions.length - 1; i >= 0; i--) {
 			ids.push($scope.suggestions[i]._id);
 		}
-		
+
 		params['notin'] = ids;
 
 		loadSuggestions(params, function(suggestions){
@@ -236,20 +236,20 @@ angular.module('meetabroad.controllers', [])
 			}
 			else
 				$scope.hasMoreData = false;
-			
+
 			$scope.$broadcast('scroll.infiniteScrollComplete');
 		});
-    }
-	
+		}
+
 	auth.getUser().then(function(response){
 
 		user = response.data;
 		$scope.user = user;
-		
+
 		var params = {};
 		params['user'] = user;
 		params['notin'] = [];
-		
+
 		loadSuggestions(params, function(suggestions){
 			if(suggestions !== null)
 				$scope.suggestions = $scope.suggestions.concat(suggestions);
@@ -278,12 +278,70 @@ angular.module('meetabroad.controllers', [])
 	});
 })
 .controller('MessageController', function($scope, $http, ApiData, auth, $ionicFilterBar) {
-  //$scope.places = [{name:'New York'}, {name: 'London'}, {name: 'Milan'}, {name:'Paris'}];
+	//$scope.places = [{name:'New York'}, {name: 'London'}, {name: 'Milan'}, {name:'Paris'}];
  $scope.connections = [];
+
+	$scope.showFilterBar = function () {
+		var filterBarInstance = $ionicFilterBar.show({
+			cancelText: "<i class='ion-ios-close-outline'></i>",
+			items: $scope.connections,
+			update: function (filteredItems, filterText) {
+				$scope.connections = filteredItems;
+			}
+		});
+	};
+
+	auth.getUser().then(function successCallback(response) {
+		var user = response.data;
+
+		$http.get(ApiData.url+'/connections/established/'+user._id, {
+			headers: {Authorization: 'Bearer '+auth.getToken()}
+		}).then(function(response) {
+			data = response.data;
+
+			$scope.connections = [];
+
+			// Go through each connection and push it to the connections array, properly.
+			angular.forEach(data, function(value, key) {
+
+				value.uid1.connectionid = value._id; // otherwise it gets lost when we push uid1 or uid2
+				value.uid2.connectionid = value._id; // otherwise it gets lost when we push uid1 or uid2
+
+				if(value.uid1._id != user._id)
+				{
+					// If uid1 is not us, then we want this one
+					$scope.connections.push(value.uid1);
+				}
+				else
+				{
+					// Otherwise we want uid2
+					$scope.connections.push(value.uid2);
+				}
+			});
+		}, function(response){
+			// Error -> let's assume it's empty
+			$scope.connections = [];
+		});
+
+	});
+})
+.controller('ConnectionsController', function($scope, $http, ApiData, auth, $ionicFilterBar) {
+
+  $scope.connections = [];
+
+  $scope.pending = 0;
+
+  $http.get(ApiData.url+'/notifications/total', {
+    headers: {Authorization: 'Bearer '+auth.getToken()}
+  }).then(function(response){
+    data = response.data;
+
+    $scope.pending = data;
+  });
 
   $scope.showFilterBar = function () {
     var filterBarInstance = $ionicFilterBar.show({
-      cancelText: "<i class='ion-ios-close-outline'></i>",
+      cancelText: "Cancel",
       items: $scope.connections,
       update: function (filteredItems, filterText) {
         $scope.connections = filteredItems;
@@ -324,57 +382,4 @@ angular.module('meetabroad.controllers', [])
     });
 
   });
-
-
- // /profile/:id
-
-})
-.controller('ConnectionsController', function($scope, $http, ApiData, auth, $ionicFilterBar) {
-    
-    $scope.connections = [];
-
-    $scope.showFilterBar = function () {
-      var filterBarInstance = $ionicFilterBar.show({
-        cancelText: "<i class='ion-ios-close-outline'></i>",
-        items: $scope.connections,
-        update: function (filteredItems, filterText) {
-          $scope.connections = filteredItems;
-        }
-      });
-    };
-
-    auth.getUser().then(function successCallback(response) {
-      var user = response.data;
-
-      $http.get(ApiData.url+'/connections/established/'+user._id, {
-        headers: {Authorization: 'Bearer '+auth.getToken()}
-      }).then(function(response) {
-        data = response.data;
-
-        $scope.connections = [];
-
-        // Go through each connection and push it to the connections array, properly.
-        angular.forEach(data, function(value, key) {
-
-          value.uid1.connectionid = value._id; // otherwise it gets lost when we push uid1 or uid2
-          value.uid2.connectionid = value._id; // otherwise it gets lost when we push uid1 or uid2
-
-          if(value.uid1._id != user._id)
-          {
-            // If uid1 is not us, then we want this one
-            $scope.connections.push(value.uid1);
-          }
-          else
-          {
-            // Otherwise we want uid2
-            $scope.connections.push(value.uid2);
-          }
-        });
-      }, function(response){
-        // Error -> let's assume it's empty
-        $scope.connections = [];
-      });
-
-    });
-
-  })
+});
