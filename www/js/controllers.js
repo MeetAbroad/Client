@@ -1,6 +1,6 @@
 angular.module('meetabroad.controllers', [])
 
-.controller('AppCtrl', function($scope, $ionicPopup, $timeout, auth, ApiData, $state, $ionicFilterBar) {
+.controller('AppCtrl', function($scope, $ionicPopup, $timeout, auth, ApiData, $state, $ionicFilterBar, NotificationService) {
 
 	$scope.logOut = auth.logOut;
 	$scope.loggedIn = auth.isLoggedIn;
@@ -18,6 +18,13 @@ angular.module('meetabroad.controllers', [])
 	$scope.toProfile = function(id) {
 		$state.go('app.profile',{id: id});
 	};
+
+  $scope.refreshNotifications = function() {
+    NotificationService.load().then(function (response) {
+      $scope.notifications = response;
+    });
+  };
+  $scope.refreshNotifications();
 
 	// With the new view caching in Ionic, Controllers are only called
 	// when they are recreated or on app start, instead of every page change.
@@ -325,18 +332,64 @@ angular.module('meetabroad.controllers', [])
 
 	});
 })
-.controller('ConnectionsController', function($scope, $http, ApiData, auth, $ionicFilterBar) {
+.controller('ConnectionsController', function($scope, $http, ApiData, auth, $ionicFilterBar, NotificationService, $state) {
 
   $scope.connections = [];
 
-  $scope.pending = 0;
+  $scope.$on('$ionicView.enter', function(e) {
+    // Refresh every time we enter this view
+    auth.getUser().then(function successCallback(response) {
+      var user = response.data;
 
-  $http.get(ApiData.url+'/notifications/total', {
-    headers: {Authorization: 'Bearer '+auth.getToken()}
-  }).then(function(response){
-    data = response.data;
+      $scope.refreshConnections = function(){
+        $http.get(ApiData.url+'/connections/established/'+user._id, {
+          headers: {Authorization: 'Bearer '+auth.getToken()}
+        }).then(function(response) {
+          data = response.data;
 
-    $scope.pending = data;
+          $scope.connections = [];
+
+          // Go through each connection and push it to the connections array, properly.
+          angular.forEach(data, function(value, key) {
+
+            value.uid1.connectionid = value._id; // otherwise it gets lost when we push uid1 or uid2
+            value.uid2.connectionid = value._id; // otherwise it gets lost when we push uid1 or uid2
+
+            if(value.uid1._id != user._id)
+            {
+              // If uid1 is not us, then we want this one
+              $scope.connections.push(value.uid1);
+            }
+            else
+            {
+              // Otherwise we want uid2
+              $scope.connections.push(value.uid2);
+            }
+          });
+        }, function(response){
+          // Error -> let's assume it's empty
+          $scope.connections = [];
+        });
+      }
+      $scope.refreshConnections();
+
+      // Delete connection
+      $scope.deleteConnection = function(id){
+
+        $http.post(ApiData.url+'/connections/delete/'+id, user, {
+          headers: {Authorization: 'Bearer '+auth.getToken()}
+        }).then(function successCallback(response) {
+          data = response.data;
+
+          $scope.showAlert('Success', data);
+
+          $scope.refreshConnections();
+        }, function errorCallback(response) {
+          data = response.data;
+          $scope.showAlert('Error rejecting', data);
+        });
+      };
+    });
   });
 
   $scope.showFilterBar = function () {
@@ -348,38 +401,63 @@ angular.module('meetabroad.controllers', [])
       }
     });
   };
+})
+.controller('ConnectionsPendingController', function($scope, $http, ApiData, auth, NotificationService) {
 
+  // Get user
   auth.getUser().then(function successCallback(response) {
-    var user = response.data;
+    $scope.user = response.data;
+    $scope.total = 0;
 
-    $http.get(ApiData.url+'/connections/established/'+user._id, {
-      headers: {Authorization: 'Bearer '+auth.getToken()}
-    }).then(function(response) {
-      data = response.data;
-
+    function refreshRequests() {
+      $scope.total = 0;
       $scope.connections = [];
 
-      // Go through each connection and push it to the connections array, properly.
-      angular.forEach(data, function(value, key) {
+      $http.get(ApiData.url + '/notifications', {
+        headers: {Authorization: 'Bearer ' + auth.getToken()}
+      }).then(function (response) {
+        data = response.data;
 
-        value.uid1.connectionid = value._id; // otherwise it gets lost when we push uid1 or uid2
-        value.uid2.connectionid = value._id; // otherwise it gets lost when we push uid1 or uid2
-
-        if(value.uid1._id != user._id)
-        {
-          // If uid1 is not us, then we want this one
-          $scope.connections.push(value.uid1);
-        }
-        else
-        {
-          // Otherwise we want uid2
-          $scope.connections.push(value.uid2);
-        }
+        $scope.connections = data.notifications;
+        $scope.total = data.total;
       });
-    }, function(response){
-      // Error -> let's assume it's empty
-      $scope.connections = [];
-    });
+    }
+    refreshRequests();
 
+    // Accept request
+    $scope.acceptRequest = function (id) {
+      $http.post(ApiData.url+'/connections/accept/' + id, $scope.user, {
+        headers: {Authorization: 'Bearer ' + auth.getToken()}
+      }).then(function successCallback(response) {
+        data = response.data;
+
+        $scope.showAlert('Success', data);
+
+        refreshRequests();
+        $scope.refreshNotifications();
+
+      }, function errorCallback(response) {
+        data = response.data;
+        $scope.showAlert('Error accepting', data);
+      });
+    };
+
+    // Reject request
+    $scope.rejectRequest = function (id) {
+      $http.post(ApiData.url+'/connections/reject/' + id, $scope.user, {
+        headers: {Authorization: 'Bearer ' + auth.getToken()}
+      }).then(function successCallback(response) {
+        data = response.data;
+
+        $scope.showAlert('Success', data);
+
+        refreshRequests();
+        $scope.refreshNotifications();
+
+      }, function errorCallback(response) {
+        data = response.data;
+        $scope.showAlert('Error rejecting', data);
+      });
+    };
   });
 });

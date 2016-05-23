@@ -1,0 +1,23 @@
+<ion-view view-title="{{ total }} Pending Requests">
+
+  <ion-content padding='true'>
+
+    <ion-list>
+      <ion-item ng-repeat="connection in connections" class="item-thumbnail-left">
+        <img ng-click="toProfile(connection.uid1._id)" ng-src="{{ ApiUrl }}/img/avatar-placeholder.png" ng-if="!connection.uid1.picture" />
+        <img ng-click="toProfile(connection.uid1._id)" ng-src="{{ ApiUrl }}/pictures/{{ connection.uid1.picture }}" ng-if="connection.uid1.picture!==undefined && connection.uid1.picture.indexOf('https://') === -1 && connection.uid1.picture" />
+        <img ng-click="toProfile(connection.uid1._id)" ng-src="{{ connection.uid1.picture }}" ng-if="connection.uid1.picture!==undefined && connection.uid1.picture.indexOf('https://') !== -1"/>
+
+        <h2 class="list-fullname" ng-click="toProfile(connection.uid1._id)">{{connection.uid1.firstname}} {{connection.uid1.lastname}}</h2>
+
+        <div class="button-bar">
+          <button ng-click="acceptRequest(connection._id)" class="button button-balanced button-small">Accept</button>
+          <button ng-click="rejectRequest(connection._id)" class="button button-assertive button-small">Reject</button>
+        </div>
+      </ion-item>
+      <ion-item ng-if="total===0">
+        You have no pending requests.
+      </ion-item>
+    </ion-list>
+  </ion-content>
+</ion-view>

@@ -28,6 +28,25 @@ angular.module('meetabroad', ['ionic', 'meetabroad.controllers', 'jett.ionic.fil
 	};
 })
 
+.factory('NotificationService', function($http, ApiData, auth) {
+
+  var notifications = {total: 0};
+
+  notifications.load = function() {
+    return $http.get(ApiData.url + '/notifications/total', {
+      headers: {Authorization: 'Bearer ' + auth.getToken()}
+    }).then(function (response) {
+      data = response.data;
+
+      notifications.total = data;
+
+      return notifications.total;
+    });
+  };
+
+  return notifications;
+})
+
 .factory('auth', function($http, $window, $location, ApiData){
 		var auth = {};
 
@@ -85,62 +104,75 @@ angular.module('meetabroad', ['ionic', 'meetabroad.controllers', 'jett.ionic.fil
 .config(function($stateProvider, $urlRouterProvider) {
 	$stateProvider
 
-  .state('app', {
-    url: '/app',
-    abstract: true,
-    templateUrl: 'templates/menu.html',
-    controller: 'AppCtrl'
-  })
-  .state('app.browse', {
-      url: '/browse',
-    views: {
-    'menuContent': {
-      templateUrl: 'templates/browse.html'
-      }
-    },
-    onEnter: function($state, auth){
-      if(!auth.isLoggedIn())
-        $state.go('app.login');
-    }
-  })
-  .state('app.search', {
-    url: '/search',
-    views: {
+    .state('app', {
+      url: '/app',
+      abstract: true,
+      templateUrl: 'templates/menu.html',
+      controller: 'AppCtrl'
+    })
+    .state('app.browse', {
+        url: '/browse',
+      views: {
       'menuContent': {
-        templateUrl: 'templates/search.html'
+        templateUrl: 'templates/browse.html'
+        }
+      },
+      onEnter: function($state, auth){
+        if(!auth.isLoggedIn())
+          $state.go('app.login');
       }
-    },
-    onEnter: function($state, auth){
-      if(!auth.isLoggedIn())
-        $state.go('app.login');
-    }
-  })
-  .state('app.messages', {
-    url: '/messages',
-    views: {
-    'menuContent': {
-        templateUrl: 'templates/messages/write-message.html',
-        controller: 'MessageController'
+    })
+    .state('app.search', {
+      url: '/search',
+      views: {
+        'menuContent': {
+          templateUrl: 'templates/search.html'
+        }
+      },
+      onEnter: function($state, auth){
+        if(!auth.isLoggedIn())
+          $state.go('app.login');
       }
-    },
-    onEnter: function($state, auth){
-      if(!auth.isLoggedIn())
-        $state.go('app.login');
-    }
-  })
-  .state('app.connections', {
-    url: '/connections',
-    views: {
+    })
+    .state('app.messages', {
+      url: '/messages',
+      views: {
       'menuContent': {
-        templateUrl: 'templates/connections.html',
-        controller: 'ConnectionsController'
+          templateUrl: 'templates/messages/write-message.html',
+          controller: 'MessageController'
+        }
+      },
+      onEnter: function($state, auth){
+        if(!auth.isLoggedIn())
+          $state.go('app.login');
       }
-    },
-    onEnter: function($state, auth){
-      if(!auth.isLoggedIn())
-        $state.go('app.login');
-    }
-  })
+    })
+    .state('app.connections', {
+      url: '/connections',
+      views: {
+        'menuContent': {
+          templateUrl: 'templates/connections.html',
+          controller: 'ConnectionsController'
+        }
+      },
+      onEnter: function($state, auth){
+        if(!auth.isLoggedIn())
+          $state.go('app.login');
+      }
+    })
+    .state('app.connections_pending', {
+      url: '/connections/pending',
+      views: {
+        'menuContent': {
+          templateUrl: 'templates/connections-pending.html',
+          controller: 'ConnectionsPendingController'
+        }
+      },
+      onEnter: function($state, auth){
+        if(!auth.isLoggedIn())
+          $state.go('app.login');
+      }
+    })
   .state('app.interests', {
     url: '/interests',
     views: {
