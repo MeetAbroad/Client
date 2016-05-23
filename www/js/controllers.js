@@ -164,65 +164,96 @@ angular.module('meetabroad.controllers', [])
 
 .controller('BrowseController', function($scope, $http, ApiData, auth) {
 	$scope.suggestions = [];
+	
+	$scope.hasMoreData = true;
+	
+	function loadSuggestions(params, callback){
+		
+		var user = params['user'];
+		
+		var data = '';
+		if(params['notin'].length > 0)
+		{
+			var ampersand = '';
+			for (var i=0; i < params['notin'].length; i++) {
+				data += ampersand+'notin[]='+params['notin'][i];
+				ampersand = '&';
+			}
+		}
 
-	$scope.loadSuggestions = function(user){
-
-		// Make suggestions available to the whole app
-		$http.get(ApiData.url+'/users/destinationcity/'+user.destinationcountry+'/'+user.destinationcity, {
+		$http({
+			url: ApiData.url+'/users/destinationcity/'+user.destinationcountry+'/'+user.destinationcity+'?'+data,
+			method: 'GET',
 			headers: {Authorization: 'Bearer '+auth.getToken()}
 		}).then(function(response){
 
 			suggestions = response.data;
 
-			////// IMPORTANT: TODO this should probably be on the server-side...but meh...
-
-			// Now get our connections so we can remove those users from this list
-			$http.get(ApiData.url+'/connections/'+user._id, {
-				headers: {Authorization: 'Bearer '+auth.getToken()}
-			}).then(function successCallback(response){
-
-
-					var connections = response.data;
-
-					// Remove them
-					for (var i = suggestions.length - 1; i >= 0; i--) {
-						var s = suggestions[i];
-						s.loading = false;
-
-						for (var j = connections.length - 1; j >= 0; j--) {
-							var c = connections[j];
-
-							if(
-								(s._id == c.uid1 && c.uid2 == user._id)
-								||
-								(s._id == c.uid2 && c.uid1 == user._id)
-							)
-							{
-								suggestions.splice(i, 1);
-								break;
-							}
-						}
-					}
-
-					// We have our results now
-					$scope.suggestions = suggestions;
-					$scope.$broadcast('scroll.refreshComplete');
-
-				}, function errorCallback(response){
-					// We have our results already
-					$scope.suggestions = suggestions;
-					$scope.$broadcast('scroll.refreshComplete');
-				}
-			);
+			// We have our results now
+			callback(suggestions);
+		},function(response){
+			// Nothing to retreive I suppose. ("no results found")
+			callback(null);
 		});
     }
 
+	$scope.refreshSuggestions = function(user){
+		var params = {};
+
+		params['user'] = user;
+		params['notin'] = [];
+
+		loadSuggestions(params, function(suggestions){
+			if(suggestions !== null)
+			{
+				$scope.hasMoreData = true;
+				$scope.suggestions = suggestions;
+			}
+			else
+				$scope.hasMoreData = false;
+			$scope.$broadcast('scroll.refreshComplete');
+		});
+    }
+
+	$scope.loadMoreSuggestions = function(user){
+		var params = {};
+
+		params['user'] = user;
+		
+		// Get the IDs of the existing suggestions into an array
+		var ids = [];
+		for (var i = $scope.suggestions.length - 1; i >= 0; i--) {
+			ids.push($scope.suggestions[i]._id);
+		}
+		
+		params['notin'] = ids;
+
+		loadSuggestions(params, function(suggestions){
+			if(suggestions !== null)
+			{
+				$scope.hasMoreData = true;
+				$scope.suggestions = $scope.suggestions.concat(suggestions);
+			}
+			else
+				$scope.hasMoreData = false;
+			
+			$scope.$broadcast('scroll.infiniteScrollComplete');
+		});
+    }
+	
 	auth.getUser().then(function(response){
 
 		user = response.data;
 		$scope.user = user;
-
-		$scope.loadSuggestions(user);
+		
+		var params = {};
+		params['user'] = user;
+		params['notin'] = [];
+		
+		loadSuggestions(params, function(suggestions){
+			if(suggestions !== null)
+				$scope.suggestions = $scope.suggestions.concat(suggestions);
+		});
 
 		// Send request
 		$scope.sendRequest = function(id, index){
