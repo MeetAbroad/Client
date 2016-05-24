@@ -1,6 +1,6 @@
 angular.module('meetabroad.controllers', [])
 
-.controller('AppCtrl', function($scope, $ionicPopup, $timeout, auth, ApiData, $state, $ionicFilterBar, NotificationService) {
+.controller('AppCtrl', function($scope, $ionicPopup, $timeout, auth, ApiData, $state, $ionicFilterBar, NotificationService, $interval) {
 
 	$scope.logOut = auth.logOut;
 	$scope.loggedIn = auth.isLoggedIn;
@@ -14,17 +14,25 @@ angular.module('meetabroad.controllers', [])
 			template: message,
 		});
 	};
-
-	$scope.toProfile = function(id) {
-		$state.go('app.profile',{id: id});
-	};
-
-  $scope.refreshNotifications = function() {
-    NotificationService.load().then(function (response) {
-      $scope.notifications = response;
-    });
-  };
-  $scope.refreshNotifications();
+	
+	if(auth.isLoggedIn())
+	{
+		$scope.toProfile = function(id) {
+			$state.go('app.profile',{id: id});
+		};
+		
+		$scope.refreshNotifications = function() {
+		NotificationService.load().then(function (response) {
+			$scope.notifications = response;
+			});
+		};
+		$scope.refreshNotifications();
+		
+		// Set an interval for refreshing the main controller data (5s) (will only start in 5s, that's why we refresh first)
+		$interval(function() {
+			$scope.refreshNotifications();
+		}, 5000);
+	}
 
 	// With the new view caching in Ionic, Controllers are only called
 	// when they are recreated or on app start, instead of every page change.
@@ -170,6 +178,7 @@ angular.module('meetabroad.controllers', [])
 })
 
 .controller('BrowseController', function($scope, $http, ApiData, auth) {
+	
 	$scope.suggestions = [];
 
 	$scope.hasMoreData = true;
@@ -202,7 +211,7 @@ angular.module('meetabroad.controllers', [])
 			// Nothing to retreive I suppose. ("no results found")
 			callback(null);
 		});
-		}
+	};
 
 	$scope.refreshSuggestions = function(user){
 		var params = {};
@@ -220,7 +229,7 @@ angular.module('meetabroad.controllers', [])
 				$scope.hasMoreData = false;
 			$scope.$broadcast('scroll.refreshComplete');
 		});
-		}
+	};
 
 	$scope.loadMoreSuggestions = function(user){
 		var params = {};
@@ -246,42 +255,44 @@ angular.module('meetabroad.controllers', [])
 
 			$scope.$broadcast('scroll.infiniteScrollComplete');
 		});
-		}
+	};
+	
+	$scope.$on('$ionicView.enter', function(e) {
+		auth.getUser().then(function(response){
 
-	auth.getUser().then(function(response){
+			user = response.data;
+			$scope.user = user;
 
-		user = response.data;
-		$scope.user = user;
+			var params = {};
+			params['user'] = user;
+			params['notin'] = [];
 
-		var params = {};
-		params['user'] = user;
-		params['notin'] = [];
-
-		loadSuggestions(params, function(suggestions){
-			if(suggestions !== null)
-				$scope.suggestions = $scope.suggestions.concat(suggestions);
-		});
-
-		// Send request
-		$scope.sendRequest = function(id, index){
-
-			$scope.suggestions[index].loading = 1;
-
-			$http.post(ApiData.url+'/connections/new/'+id, user, {
-				headers: {Authorization: 'Bearer '+auth.getToken()}
-			}).then(function successCallback(response) {
-				data = response.data;
-
-				$scope.suggestions[index].loading = 2;
-
-			}, function errorCallback(response) {
-				data = response.data;
-
-				$scope.showAlert('Error', data);
-
-				$scope.suggestions[index].loading = 0;
+			loadSuggestions(params, function(suggestions){
+				if(suggestions !== null)
+					$scope.suggestions = $scope.suggestions.concat(suggestions);
 			});
-		};
+
+			// Send request
+			$scope.sendRequest = function(id, index){
+
+				$scope.suggestions[index].loading = 1;
+
+				$http.post(ApiData.url+'/connections/new/'+id, user, {
+					headers: {Authorization: 'Bearer '+auth.getToken()}
+				}).then(function successCallback(response) {
+					data = response.data;
+
+					$scope.suggestions[index].loading = 2;
+
+				}, function errorCallback(response) {
+					data = response.data;
+
+					$scope.showAlert('Error', data);
+
+					$scope.suggestions[index].loading = 0;
+				});
+			};
+		});
 	});
 })
 .controller('MessageController', function($scope, $http, ApiData, auth, $ionicFilterBar) {
@@ -334,130 +345,134 @@ angular.module('meetabroad.controllers', [])
 })
 .controller('ConnectionsController', function($scope, $http, ApiData, auth, $ionicFilterBar, NotificationService, $state) {
 
-  $scope.connections = [];
+	$scope.$on('$ionicView.enter', function(e) {
+	  $scope.connections = [];
 
-  $scope.$on('$ionicView.enter', function(e) {
-    // Refresh every time we enter this view
-    auth.getUser().then(function successCallback(response) {
-      var user = response.data;
+	  $scope.$on('$ionicView.enter', function(e) {
+		// Refresh every time we enter this view
+		auth.getUser().then(function successCallback(response) {
+		  var user = response.data;
 
-      $scope.refreshConnections = function(){
-        $http.get(ApiData.url+'/connections/established/'+user._id, {
-          headers: {Authorization: 'Bearer '+auth.getToken()}
-        }).then(function(response) {
-          data = response.data;
+		  $scope.refreshConnections = function(){
+			$http.get(ApiData.url+'/connections/established/'+user._id, {
+			  headers: {Authorization: 'Bearer '+auth.getToken()}
+			}).then(function(response) {
+			  data = response.data;
 
-          $scope.connections = [];
+			  $scope.connections = [];
 
-          // Go through each connection and push it to the connections array, properly.
-          angular.forEach(data, function(value, key) {
+			  // Go through each connection and push it to the connections array, properly.
+			  angular.forEach(data, function(value, key) {
 
-            value.uid1.connectionid = value._id; // otherwise it gets lost when we push uid1 or uid2
-            value.uid2.connectionid = value._id; // otherwise it gets lost when we push uid1 or uid2
+				value.uid1.connectionid = value._id; // otherwise it gets lost when we push uid1 or uid2
+				value.uid2.connectionid = value._id; // otherwise it gets lost when we push uid1 or uid2
 
-            if(value.uid1._id != user._id)
-            {
-              // If uid1 is not us, then we want this one
-              $scope.connections.push(value.uid1);
-            }
-            else
-            {
-              // Otherwise we want uid2
-              $scope.connections.push(value.uid2);
-            }
-          });
-        }, function(response){
-          // Error -> let's assume it's empty
-          $scope.connections = [];
-        });
-      }
-      $scope.refreshConnections();
+				if(value.uid1._id != user._id)
+				{
+				  // If uid1 is not us, then we want this one
+				  $scope.connections.push(value.uid1);
+				}
+				else
+				{
+				  // Otherwise we want uid2
+				  $scope.connections.push(value.uid2);
+				}
+			  });
+			}, function(response){
+			  // Error -> let's assume it's empty
+			  $scope.connections = [];
+			});
+		  }
+		  $scope.refreshConnections();
 
-      // Delete connection
-      $scope.deleteConnection = function(id){
+		  // Delete connection
+		  $scope.deleteConnection = function(id){
 
-        $http.post(ApiData.url+'/connections/delete/'+id, user, {
-          headers: {Authorization: 'Bearer '+auth.getToken()}
-        }).then(function successCallback(response) {
-          data = response.data;
+			$http.post(ApiData.url+'/connections/delete/'+id, user, {
+			  headers: {Authorization: 'Bearer '+auth.getToken()}
+			}).then(function successCallback(response) {
+			  data = response.data;
 
-          $scope.showAlert('Success', data);
+			  $scope.showAlert('Success', data);
 
-          $scope.refreshConnections();
-        }, function errorCallback(response) {
-          data = response.data;
-          $scope.showAlert('Error rejecting', data);
-        });
-      };
-    });
-  });
+			  $scope.refreshConnections();
+			}, function errorCallback(response) {
+			  data = response.data;
+			  $scope.showAlert('Error rejecting', data);
+			});
+		  };
+		});
+	  });
 
-  $scope.showFilterBar = function () {
-    var filterBarInstance = $ionicFilterBar.show({
-      cancelText: "Cancel",
-      items: $scope.connections,
-      update: function (filteredItems, filterText) {
-        $scope.connections = filteredItems;
-      }
-    });
-  };
+	  $scope.showFilterBar = function () {
+		var filterBarInstance = $ionicFilterBar.show({
+		  cancelText: "Cancel",
+		  items: $scope.connections,
+		  update: function (filteredItems, filterText) {
+			$scope.connections = filteredItems;
+		  }
+		});
+	  };
+	});
 })
 .controller('ConnectionsPendingController', function($scope, $http, ApiData, auth, NotificationService) {
 
   // Get user
-  auth.getUser().then(function successCallback(response) {
-    $scope.user = response.data;
-    $scope.total = 0;
+  $scope.$on('$ionicView.enter', function(e) {
+	  auth.getUser().then(function successCallback(response) {
+		$scope.user = response.data;
+		$scope.total = 0;
 
-    function refreshRequests() {
-      $scope.total = 0;
-      $scope.connections = [];
+		function refreshRequests() {
+		  $scope.total = 0;
+		  $scope.connections = [];
 
-      $http.get(ApiData.url + '/notifications', {
-        headers: {Authorization: 'Bearer ' + auth.getToken()}
-      }).then(function (response) {
-        data = response.data;
+		  $http.get(ApiData.url + '/notifications', {
+			headers: {Authorization: 'Bearer ' + auth.getToken()}
+		  }).then(function (response) {
+			data = response.data;
 
-        $scope.connections = data.notifications;
-        $scope.total = data.total;
-      });
-    }
-    refreshRequests();
+			$scope.connections = data.notifications;
+			$scope.total = data.total;
+		  });
+		}
+		refreshRequests();
 
-    // Accept request
-    $scope.acceptRequest = function (id) {
-      $http.post(ApiData.url+'/connections/accept/' + id, $scope.user, {
-        headers: {Authorization: 'Bearer ' + auth.getToken()}
-      }).then(function successCallback(response) {
-        data = response.data;
+		// Accept request
+		$scope.acceptRequest = function (id) {
+		  $http.post(ApiData.url+'/connections/accept/' + id, $scope.user, {
+			headers: {Authorization: 'Bearer ' + auth.getToken()}
+		  }).then(function successCallback(response) {
+			data = response.data;
 
-        $scope.showAlert('Success', data);
+			$scope.showAlert('Success', data);
 
-        refreshRequests();
-        $scope.refreshNotifications();
+			refreshRequests();
+			$scope.refreshNotifications();
 
-      }, function errorCallback(response) {
-        data = response.data;
-        $scope.showAlert('Error accepting', data);
-      });
-    };
+		  }, function errorCallback(response) {
+			data = response.data;
+			$scope.showAlert('Error accepting', data);
+		  });
+		};
 
-    // Reject request
-    $scope.rejectRequest = function (id) {
-      $http.post(ApiData.url+'/connections/reject/' + id, $scope.user, {
-        headers: {Authorization: 'Bearer ' + auth.getToken()}
-      }).then(function successCallback(response) {
-        data = response.data;
+		// Reject request
+		$scope.rejectRequest = function (id) {
+		  $http.post(ApiData.url+'/connections/reject/' + id, $scope.user, {
+			headers: {Authorization: 'Bearer ' + auth.getToken()}
+		  }).then(function successCallback(response) {
+			data = response.data;
 
-        $scope.showAlert('Success', data);
+			$scope.showAlert('Success', data);
 
-        refreshRequests();
-        $scope.refreshNotifications();
+			refreshRequests();
+			$scope.refreshNotifications();
 
-      }, function errorCallback(response) {
-        data = response.data;
-        $scope.showAlert('Error rejecting', data);
-      });
-    };
+		  }, function errorCallback(response) {
+			data = response.data;
+			$scope.showAlert('Error rejecting', data);
+		  });
+		};
+	  });
   });
 });
