@@ -1,1 +1,1 @@
-angular.module('meetabroad.controllers', [])
+angular.module('meetabroad.controllers', ['ngOpenFB'])
