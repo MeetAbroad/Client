@@ -1,6 +1,42 @@
 <ion-view view-title="Search">
-  <ion-content>
-    <h1>Search</h1>
-	<p>This is where it will be possible to search by name and other fields.</p>
-  </ion-content>
+	<ion-content>
+		<div class="list" ng-if="searchForm">
+			<label class="item item-input item-stacked-label">
+				<span class="input-label">First Name</span>
+				<input type="text" placeholder="First Name" ng-model="search.firstname">
+			</label>
+			<label class="item item-input item-stacked-label">
+				<span class="input-label">Last Name</span>
+				<input type="text" placeholder="Last Name" ng-model="search.lastname">
+			</label>
+			<label class="item item-input">
+				<span class="input-label">Filter:</span>
+				<input type="text" ng-model="searchText">
+			</label>
+			<ion-checkbox ng-repeat="interest in interests | orderBy:'title' | filter:searchText" ng-model="search.selected[interest.codename]">
+				{{ interest.title }} 
+				<p>{{ interest.description }}</p>
+			</ion-checkbox>
+		</div>
+		<ion-list ng-if="searchResults">
+			<ion-item ng-repeat="result in results" class="item-thumbnail-left item-icon-right" ng-if="results.length!==0">
+				<img ng-click="toProfile(result._id)" ng-src="{{ ApiUrl }}/img/avatar-placeholder.png" ng-if="!result.picture" />
+				<img ng-click="toProfile(result._id)" ng-src="{{ ApiUrl }}/pictures/{{ result.picture }}" ng-if="result.picture!==undefined && result.picture.indexOf('https://') === -1 && result.picture" />
+				<img ng-click="toProfile(result._id)" ng-src="{{ result.picture }}" ng-if="result.picture!==undefined && result.picture.indexOf('https://') !== -1"/>
+				<h2 class="list-fullname" ng-click="toProfile(result._id)">{{result.firstname}} {{result.lastname}}</h2>
+				<p><i class="ion-home"></i> {{ result.origincountry }} - {{ result.origincity }}</p>
+				<p><i class="ion-plane"></i> {{ result.destinationcountry }} - {{ result.destinationcity }}</p>
+
+				<a ng-click="sendRequest(result._id, $index)" ng-hide="result.loading"><i class="icon ion-plus-circled active"></i></a>
+				<a ng-if="result.loading === 2"><i class="icon ion-checkmark-circled balanced"></i></a>
+				<ion-spinner ng-if="result.loading === 1" class="icon"></ion-spinner>
+			</ion-item>
+		</ion-list>
+	</ion-content>
+	<div class="bar bar-footer bar-stable" ng-if="searchForm">
+		<button class="button button-positive" ng-click="doSearch()" style="width: 100%">Search</button>
+	</div>
+	<div class="bar bar-footer bar-stable" ng-if="searchResults">
+		<button class="button button-positive" ng-click="resetSearch()" style="width: 100%">Back to search form</button>
+	</div>
 </ion-view>

@@ -126,7 +126,8 @@ angular.module('meetabroad', ['ionic', 'meetabroad.controllers', 'jett.ionic.fil
         url: '/search',
         views: {
           'menuContent': {
-            templateUrl: 'templates/search.html'
+            templateUrl: 'templates/search.html',
+		controller: 'SearchController'
           }
         },
         onEnter: function($state, auth){
