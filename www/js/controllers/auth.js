@@ -1,7 +1,7 @@
 (function() {
 	var app = angular.module('meetabroad.controllers');
 
-	app.controller('LoginController', function($scope, $state, auth, $window, ngFB) {
+	app.controller('LoginController', function($scope, $state, auth, $window, ngFB, $ionicLoading, $http, ApiData) {
 		$scope.user = {};
 
 		$scope.logIn = function()
@@ -20,24 +20,37 @@
 		};
 		
 		$scope.fbLogin = function () {
+			
+			$ionicLoading.show({
+				template: 'Please wait...'
+			});
+			
 			ngFB.login({scope: 'email,public_profile'}).then(
 			function (response) {
 				if (response.status === 'connected') {
-					console.log('Facebook login succeeded');
-					
 					ngFB.api({
 						path: '/me',
 						params: {fields: 'id,first_name,gender,last_name,email,picture'}
 					}).then(
 						function (user) {
-							console.log(user);
+							user.access_token = response.authResponse.accessToken;
+							$http.post(ApiData.url+'/mobile/facebook', user).success(function(data){
+								auth.saveToken(data.token);
+								$ionicLoading.hide();
+								$window.location.reload(true);
+							}).error(function(data){
+								$ionicLoading.hide();
+								$scope.showAlert('Error', data);
+							});
 						},
 						function (error) {
-							alert('Facebook error: ' + error.error_description);
+							$ionicLoading.hide();
+							$scope.showAlert('Facebook Error', error.error_description);
 						}
 					);
 				} else {
-					alert('Facebook login failed');
+					$ionicLoading.hide();
+					$scope.showAlert('Facebook Error', 'Facebook login failed');
 				}
 			});
 		};
