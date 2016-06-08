@@ -1,7 +1,7 @@
 (function() {
 	var app = angular.module('meetabroad.controllers');
 
-	app.controller('BrowseController', function($scope, $http, ApiData, auth) {
+	app.controller('BrowseController', function($scope, $http, ApiData, auth, $state) {
 		
 		$scope.suggestions = [];
 
@@ -86,36 +86,44 @@
 
 				user = response.data;
 				$scope.user = user;
+				
+				if(user.destinationcity == '__undefined__')
+				{
+					// Already finished...
+					$state.go('app.finishreg');
+				}
+				else
+				{
+					var params = {};
+					params['user'] = user;
+					params['notin'] = [];
 
-				var params = {};
-				params['user'] = user;
-				params['notin'] = [];
-
-				loadSuggestions(params, function(suggestions){
-					if(suggestions !== null)
-						$scope.suggestions = $scope.suggestions.concat(suggestions);
-				});
-
-				// Send request
-				$scope.sendRequest = function(id, index){
-
-					$scope.suggestions[index].loading = 1;
-
-					$http.post(ApiData.url+'/connections/new/'+id, user, {
-						headers: {Authorization: 'Bearer '+auth.getToken()}
-					}).then(function successCallback(response) {
-						data = response.data;
-
-						$scope.suggestions[index].loading = 2;
-
-					}, function errorCallback(response) {
-						data = response.data;
-
-						$scope.showAlert('Error', data);
-
-						$scope.suggestions[index].loading = 0;
+					loadSuggestions(params, function(suggestions){
+						if(suggestions !== null)
+							$scope.suggestions = $scope.suggestions.concat(suggestions);
 					});
-				};
+
+					// Send request
+					$scope.sendRequest = function(id, index){
+
+						$scope.suggestions[index].loading = 1;
+
+						$http.post(ApiData.url+'/connections/new/'+id, user, {
+							headers: {Authorization: 'Bearer '+auth.getToken()}
+						}).then(function successCallback(response) {
+							data = response.data;
+
+							$scope.suggestions[index].loading = 2;
+
+						}, function errorCallback(response) {
+							data = response.data;
+
+							$scope.showAlert('Error', data);
+
+							$scope.suggestions[index].loading = 0;
+						});
+					};
+				}
 			});
 		});
 	})

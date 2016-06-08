@@ -55,4 +55,51 @@
 			});
 		};
 	})
+	
+	app.controller('FinishregController', function($scope, $http, auth, $state, $ionicLoading, ApiData) {
+		
+		auth.getUser().then(function(response){
+			
+			user = response.data;
+			$scope.user = user;
+		
+			if(user.destinationcity !== '__undefined__')
+			{
+				// Already finished...
+				$state.go('app.browse');
+			}
+			
+			$scope.user = user;
+		
+			// Erase our default fields
+			$scope.user.destinationcity = '';
+			$scope.user.destinationcountry = '';
+			$scope.user.origincity = '';
+			$scope.user.origincountry = '';
+			$scope.user.age = '';
+			$scope.user.gender = null;
+			
+			// Update our options
+			$scope.updateOptions = function(){
+				
+				$ionicLoading.show({
+					template: 'Please wait...'
+				});
+				
+				$http.post(ApiData.url+'/users/update', $scope.user, {
+					headers: {Authorization: 'Bearer '+auth.getToken()}
+				}).then(function successCallback(response){
+					data = response.data;
+					
+					$ionicLoading.hide();
+					$state.go('app.browse');
+					
+				}, function errorCallback(response){
+					data = response.data;
+					$ionicLoading.hide();
+					$scope.showAlert('Error', data);
+				});
+			};
+		});
+	});
 })();

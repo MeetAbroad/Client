@@ -254,6 +254,21 @@ angular.module('meetabroad', ['ionic', 'meetabroad.controllers', 'jett.ionic.fil
 	    if(auth.isLoggedIn())
 		$state.go('app.browse');
 	  }
+	})
+	
+	/*** Finish Registration ***/
+	.state('app.finishreg', {
+	  url: '/finishreg',
+	  views: {
+	    'menuContent': {
+		templateUrl: 'templates/finishreg.html',
+		controller: 'FinishregController'
+	    }
+	  },
+	  onEnter: function($state, auth){
+	    if(!auth.isLoggedIn())
+		$state.go('app.login');
+	  }
 	});
 
     // if none of the above states are matched, use this as the fallback
