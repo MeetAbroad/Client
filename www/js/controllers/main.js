@@ -32,7 +32,7 @@
 			// Set an interval for refreshing the main controller data (5s) (will only start in 5s, that's why we refresh first)
 			$interval(function() {
 				$scope.refreshNotifications();
-			}, 5000);
+			}, 10000);
 		}
 
 		// With the new view caching in Ionic, Controllers are only called
