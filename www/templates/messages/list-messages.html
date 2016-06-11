@@ -9,27 +9,12 @@
       </div>
     </div>
     <div class="list">
-      <!--<a class="item item-avatar" href="#" ng-repeat="message in listmessages">
+      <a class="item item-avatar" href="#" ng-repeat="message in listmessages">
         <img ng-src="{{ ApiUrl }}/img/avatar-placeholder.png" ng-if="!message.pic" />
         <img ng-src="{{ ApiUrl }}/pictures/{{ message.pic }}" ng-if="message.pic!==undefined && message.pic.indexOf('https://') === -1 && message.pic" />
         <img ng-src="{{ message.pic }}" ng-if="message.pic!==undefined && message.pic.indexOf('https://') !== -1"/>
-        <h2>Victoria</h2>
-        <p>Andreas, ¿qué tal?.</p>
-      </a>-->
-      <a class="item item-avatar" href="#">
-        <img src="ruben.jpg">
-        <h2>Rubén Emilio</h2>
-        <p>Iubesc pe Dumnezeu</p>
-      </a>
-      <a class="item item-avatar" href="#">
-        <img src="ben.jpg">
-        <h2>Beniamin</h2>
-        <p>Fifa 16</p>
-      </a>
-      <a class="item item-avatar" href="#">
-        <img src="marc.jpg">
-        <h2>Marc Titus</h2>
-        <p>Pentruca suntem multi in familie</p>
+        <h2>{{message.name}}</h2>
+        <p>{{message.lastmessage}}</p>
       </a>
     </div>
   </ion-content>
