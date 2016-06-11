@@ -17,7 +17,7 @@
 				  data = response.data;
 
 				  $scope.connections = [];
-
+          console.log(data);
 				  // Go through each connection and push it to the connections array, properly.
 				  angular.forEach(data, function(value, key) {
 
@@ -72,7 +72,7 @@
 		  };
 		});
 	});
-	
+
 	app.controller('ConnectionsPendingController', function($scope, $http, ApiData, auth, NotificationService) {
 
 	  // Get user
