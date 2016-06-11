@@ -5,7 +5,6 @@
 		$scope.$on('$ionicView.enter', function(e) {
 		  $scope.connections = [];
 
-		  $scope.$on('$ionicView.enter', function(e) {
 			// Refresh every time we enter this view
 			auth.getUser().then(function successCallback(response) {
 			  var user = response.data;
@@ -17,7 +16,7 @@
 				  data = response.data;
 
 				  $scope.connections = [];
-          console.log(data);
+
 				  // Go through each connection and push it to the connections array, properly.
 				  angular.forEach(data, function(value, key) {
 
@@ -70,7 +69,6 @@
 			  }
 			});
 		  };
-		});
 	});
 
 	app.controller('ConnectionsPendingController', function($scope, $http, ApiData, auth, NotificationService) {
