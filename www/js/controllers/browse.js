@@ -2,10 +2,6 @@
 	var app = angular.module('meetabroad.controllers');
 
 	app.controller('BrowseController', function($scope, $http, ApiData, auth, $state) {
-		
-		$scope.suggestions = [];
-
-		$scope.hasMoreData = true;
 
 		function loadSuggestions(params, callback){
 
@@ -82,6 +78,10 @@
 		};
 		
 		$scope.$on('$ionicView.enter', function(e) {
+			$scope.suggestions = [];
+
+			$scope.hasMoreData = true;
+			
 			auth.getUser().then(function(response){
 
 				user = response.data;
