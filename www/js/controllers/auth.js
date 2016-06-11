@@ -18,13 +18,13 @@
 				$window.location.reload(true);
 			})
 		};
-		
+
 		$scope.fbLogin = function () {
-			
+
 			$ionicLoading.show({
 				template: 'Please wait...'
 			});
-			
+
 			ngFB.login({scope: 'email,public_profile'}).then(
 			function (response) {
 				if (response.status === 'connected') {
@@ -55,22 +55,22 @@
 			});
 		};
 	})
-	
+
 	app.controller('FinishregController', function($scope, $http, auth, $state, $ionicLoading, ApiData) {
-		
+
 		auth.getUser().then(function(response){
-			
+
 			user = response.data;
 			$scope.user = user;
-		
+
 			if(user.destinationcity !== '__undefined__')
 			{
 				// Already finished...
 				$state.go('app.browse');
 			}
-			
+
 			$scope.user = user;
-		
+
 			// Erase our default fields
 			$scope.user.destinationcity = '';
 			$scope.user.destinationcountry = '';
@@ -78,22 +78,22 @@
 			$scope.user.origincountry = '';
 			$scope.user.age = '';
 			$scope.user.gender = null;
-			
+
 			// Update our options
 			$scope.updateOptions = function(){
-				
+
 				$ionicLoading.show({
 					template: 'Please wait...'
 				});
-				
+
 				$http.post(ApiData.url+'/users/update', $scope.user, {
 					headers: {Authorization: 'Bearer '+auth.getToken()}
 				}).then(function successCallback(response){
 					data = response.data;
-					
+
 					$ionicLoading.hide();
 					$state.go('app.browse');
-					
+
 				}, function errorCallback(response){
 					data = response.data;
 					$ionicLoading.hide();
@@ -102,4 +102,30 @@
 			};
 		});
 	});
+
+  app.controller('RegController', function($scope, $http, auth, $state, $ionicLoading, ApiData, $window) {
+    $scope.user = {};
+    $scope.register = function(){
+
+      $ionicLoading.show({
+        template: 'Please wait...'
+      });
+
+
+      auth.register($scope.user).error(function(data){
+        $ionicLoading.hide();
+        $scope.error = data;
+        $scope.showAlert('Error', $scope.error.message);
+      }).then(function successCallback(response){
+        data = response.data;
+
+        $ionicLoading.hide();
+        $window.location.reload(true);
+        $scope.user = {};
+
+      });
+    };
+
+  });
+
 })();

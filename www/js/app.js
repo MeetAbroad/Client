@@ -26,7 +26,7 @@ angular.module('meetabroad', ['ionic', 'meetabroad.controllers', 'jett.ionic.fil
 
 .factory('ApiData', function() {
 	return {
-		url : 'http://147.83.7.163:3000'
+		url : 'http://localhost:3000'
 	};
 })
 
@@ -92,6 +92,12 @@ angular.module('meetabroad', ['ionic', 'meetabroad.controllers', 'jett.ionic.fil
 	$window.localStorage.removeItem('meetabroad-token');
 
 	$window.location.reload(true);
+    };
+
+    auth.register = function(user){
+      return $http.post(ApiData.url+'/register', user).success(function(data){
+        auth.saveToken(data.token);
+      });
     };
 
     auth.getUser = function(){
@@ -255,7 +261,23 @@ angular.module('meetabroad', ['ionic', 'meetabroad.controllers', 'jett.ionic.fil
 		$state.go('app.browse');
 	  }
 	})
-	
+
+  /*** Registration ***/
+
+  .state('app.reg', {
+    url: '/reg',
+    views: {
+      'menuContent': {
+        templateUrl: 'templates/register.html',
+        controller: 'RegController'
+      }
+    },
+    onEnter: function($state, auth){
+      if(auth.isLoggedIn())
+        $state.go('app.browse');
+    }
+  })
+
 	/*** Finish Registration ***/
 	.state('app.finishreg', {
 	  url: '/finishreg',

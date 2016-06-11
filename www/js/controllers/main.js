@@ -15,20 +15,20 @@
 				template: message,
 			});
 		};
-		
+
 		if(auth.isLoggedIn())
 		{
 			$scope.toProfile = function(id) {
 				$state.go('app.profile',{id: id});
 			};
-			
+
 			$scope.refreshNotifications = function() {
 			NotificationService.load().then(function (response) {
 				$scope.notifications = response;
 				});
 			};
 			$scope.refreshNotifications();
-			
+
 			// Set an interval for refreshing the main controller data (5s) (will only start in 5s, that's why we refresh first)
 			$interval(function() {
 				$scope.refreshNotifications();
