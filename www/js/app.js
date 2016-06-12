@@ -143,6 +143,8 @@ angular.module('meetabroad', ['ionic', 'meetabroad.controllers', 'jett.ionic.fil
 		$state.go('app.login');
 	  }
 	})
+
+  /*** MESSAGES ***/
 	.state('app.messages', {
 	  url: '/messages',
 	  views: {
@@ -157,7 +159,7 @@ angular.module('meetabroad', ['ionic', 'meetabroad.controllers', 'jett.ionic.fil
 	  }
 	})
 	.state('app.writemessage', {
-	  url: '/writemessage',
+	  url: '/writemessage/:id',
 	  views: {
 	    'menuContent': {
 		templateUrl: 'templates/messages/write-message.html',
@@ -169,6 +171,8 @@ angular.module('meetabroad', ['ionic', 'meetabroad.controllers', 'jett.ionic.fil
 		$state.go('app.login');
 	  }
 	})
+
+
 	.state('app.connections', {
 	  url: '/connections',
 	  views: {
@@ -212,7 +216,7 @@ angular.module('meetabroad', ['ionic', 'meetabroad.controllers', 'jett.ionic.fil
 	  url: '/options',
 	  views: {
 	    'menuContent': {
-		templateUrl: 'templates/options.html', 
+		templateUrl: 'templates/options.html',
     controller: 'OptionsController'
 	    }
 	  },

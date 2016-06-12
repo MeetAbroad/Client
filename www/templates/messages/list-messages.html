@@ -1,19 +1,19 @@
 <ion-view view-title="Messages">
   <ion-content>
-    <div>
+    <!--<div>
       <div class="item item-button-right" align="center">
         Write message
         <button class="button button-positive">
           <i class="icon ion-ios-compose-outline"></i>
         </button>
       </div>
-    </div>
+    </div>-->
     <div class="list">
-      <a class="item item-avatar" href="#" ng-repeat="message in listmessages">
-        <img ng-src="{{ ApiUrl }}/img/avatar-placeholder.png" ng-if="!message.pic" />
-        <img ng-src="{{ ApiUrl }}/pictures/{{ message.pic }}" ng-if="message.pic!==undefined && message.pic.indexOf('https://') === -1 && message.pic" />
-        <img ng-src="{{ message.pic }}" ng-if="message.pic!==undefined && message.pic.indexOf('https://') !== -1"/>
-        <h2>{{message.name}}</h2>
+      <a class="item item-avatar" href="#" ng-repeat="message in listmessages | orderBy : '-dateSent'">
+        <img ng-click="openChat(message.cid)" ng-src="{{ ApiUrl }}/img/avatar-placeholder.png" ng-if="!message.pic" />
+        <img ng-click="openChat(message.cid)" ng-src="{{ ApiUrl }}/pictures/{{ message.pic }}" ng-if="message.pic!==undefined && message.pic.indexOf('https://') === -1 && message.pic" />
+        <img ng-click="openChat(message.cid)" ng-src="{{ message.pic }}" ng-if="message.pic!==undefined && message.pic.indexOf('https://') !== -1"/>
+        <h2 ng-click="openChat(message.cid)">{{message.name}}</h2>
         <p>{{message.lastmessage}}</p>
       </a>
     </div>

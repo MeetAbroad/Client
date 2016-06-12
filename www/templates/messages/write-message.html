@@ -1,18 +1,23 @@
-<ion-view view-title="Write message to...">
-
-  <ion-nav-buttons side="secondary">
-    <button class="button button-icon icon ion-ios-search-strong" ng-click="showFilterBar()">
-    </button>
-  </ion-nav-buttons>
-
-  <ion-content padding='true'>
-
-    <ion-list>
-      <ion-item ng-repeat="connection in connections">
-        <h2>{{connection.firstname}} {{connection.lastname}}</h2>
-      </ion-item>
-    </ion-list>
-
+<ion-view view-title="Messages">
+  <ion-content>
+    <div class="list">
+      <div ng-repeat="message in chats | orderBy : '-dateSent'"">
+        <a class="item item-avatar" href="#" ng-hide="message.mymessage">
+          <!-- imagen -->
+          <img ng-src="{{ ApiUrl }}/img/avatar-placeholder.png" ng-if="!message.pic" />
+          <img ng-src="{{ ApiUrl }}/pictures/{{ message.pic }}" ng-if="message.pic!==undefined && message.pic.indexOf('https://') === -1 && message.pic" />
+          <img ng-src="{{ message.pic }}" ng-if="message.pic!==undefined && message.pic.indexOf('https://') !== -1"/>
+          <h2>{{message.name}}</h2>
+          <p>{{message.message}}</p>
+        </a>
+      <a class="item item-avatar-right" href="#" ng-hide="!message.mymessage">
+        <!-- imagen -->
+        <img ng-src="{{ ApiUrl }}/img/avatar-placeholder.png" ng-if="!message.pic" />
+        <img ng-src="{{ ApiUrl }}/pictures/{{ message.pic }}" ng-if="message.pic!==undefined && message.pic.indexOf('https://') === -1 && message.pic" />
+        <img ng-src="{{ message.pic }}" ng-if="message.pic!==undefined && message.pic.indexOf('https://') !== -1"/>
+        <h2 class="text-right">Yo</h2>
+        <p class="text-right">{{message.message}}</p>
+      </a>
+    </div>
   </ion-content>
-
 </ion-view>

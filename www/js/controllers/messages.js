@@ -36,7 +36,7 @@
             if(value.uid1.picture)
               value.pic = value.uid1.picture;
             else
-              valie.pic = '';
+              value.pic = '';
 
           }
           else
@@ -53,10 +53,11 @@
 
         });
 
-		  }, function(response){
-			// Error -> let's assume it's empty
+		  }, function(data){
+        $scope.error = data;
+        $scope.showAlert('Error', $scope.error.message);
         console.log('da error');
-			$scope.listmessages = [];
+  			$scope.listmessages = [];
 		  });
 
 		});
@@ -64,53 +65,76 @@
 		// /profile/:id
 	});
 
-	app.controller('WriteMessageController', function($scope, $http, ApiData, auth, $ionicFilterBar) {
-		//$scope.places = [{name:'New York'}, {name: 'London'}, {name: 'Milan'}, {name:'Paris'}];
-		$scope.connections = [];
+  app.controller('WriteMessageController', function($scope, $http, ApiData, auth, $stateParams) {
 
-		$scope.showFilterBar = function () {
-		  var filterBarInstance = $ionicFilterBar.show({
-			cancelText: "<i class='ion-ios-close-outline'></i>",
-			items: $scope.connections,
-			update: function (filteredItems, filterText) {
-			  $scope.connections = filteredItems;
-			}
-		  });
-		};
 
-		auth.getUser().then(function successCallback(response) {
-		  var user = response.data;
+    $scope.chat = {};
 
-		  $http.get(ApiData.url+'/connections/established/'+user._id, {
-			headers: {Authorization: 'Bearer '+auth.getToken()}
-		  }).then(function(response) {
-			data = response.data;
+    auth.getUser().then(function successCallback(response) {
+      var user = response.data;
 
-			$scope.connections = [];
+      $http.get(ApiData.url+'/messages/mine/'+user._id+'/'+ $stateParams.id, {
+        headers: {Authorization: 'Bearer '+auth.getToken()}
+      }).then(function(response) {
+        $scope.chats = response.data;
 
-			// Go through each connection and push it to the connections array, properly.
-			angular.forEach(data, function(value, key) {
 
-			  value.uid1.connectionid = value._id; // otherwise it gets lost when we push uid1 or uid2
-			  value.uid2.connectionid = value._id; // otherwise it gets lost when we push uid1 or uid2
 
-			  if(value.uid1._id != user._id)
-			  {
-				// If uid1 is not us, then we want this one
-				$scope.connections.push(value.uid1);
-			  }
-			  else
-			  {
-				// Otherwise we want uid2
-				$scope.connections.push(value.uid2);
-			  }
-			});
-		  }, function(response){
-			// Error -> let's assume it's empty
-			$scope.connections = [];
-		  });
+        //Elegir picture
+        angular.forEach($scope.chats, function(value, key) {
 
-		});
-		// /profile/:id
-	});
+          if(value.uid1._id != user._id)
+          {
+
+            value.name = value.uid1.firstname + ' ' + value.uid1.lastname;
+
+
+
+            if(value.uid1.picture)
+              value.pic = value.uid1.picture;
+            else
+              value.pic = '';
+
+          }
+          else
+          {
+
+            value.name = value.uid2.firstname + ' ' + value.uid2.lastname;
+
+            if(value.uid2.picture)
+              value.pic = value.uid2.picture;
+            else
+              value.pic = '';
+
+          }
+
+          if(value.From != user._id)
+          {
+              value.mymessage = false;
+
+          }
+          else
+          {
+
+              value.mymessage = true;
+
+          }
+
+        });
+
+        console.log('Obtengo esto:::::::');
+        console.log($scope.chats);
+
+      }, function(data){
+        $scope.error = data;
+        $scope.showAlert('Error', $scope.error.message);
+        console.log('da error');
+        $scope.chats = {};
+      });
+
+    });
+
+
+  });
+
 })();

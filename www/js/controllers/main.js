@@ -22,6 +22,10 @@
 				$state.go('app.profile',{id: id});
 			};
 
+      $scope.openChat = function(id) {
+        $state.go('app.writemessage',{id: id});
+      };
+
 			$scope.refreshNotifications = function() {
 			NotificationService.load().then(function (response) {
 				$scope.notifications = response;
