@@ -103,6 +103,28 @@
 		});
 	});
 
+  app.controller('OptionsController', function($scope, $http, auth, $state, $ionicLoading, ApiData) {
+    console.log('estoy en el optionsController');
+    $scope.user = user;
+    console.log($scope.user);
+    // Update our options
+    $scope.updateOptions = function(){
+
+      $http.post(ApiData.url+'/users/update', $scope.user, {
+        headers: {Authorization: 'Bearer '+auth.getToken()}
+      }).then(function successCallback(data){
+
+        $scope.showAlert('Done','User update successfully.');
+
+      }, function errorCallback(data){
+        $scope.error = data;
+
+        $scope.showAlert('Error', $scope.error.message);
+
+      });
+    };
+  });
+
   app.controller('RegController', function($scope, $http, auth, $state, $ionicLoading, ApiData, $window) {
     $scope.user = {};
     $scope.register = function(){

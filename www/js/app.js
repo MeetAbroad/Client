@@ -212,7 +212,8 @@ angular.module('meetabroad', ['ionic', 'meetabroad.controllers', 'jett.ionic.fil
 	  url: '/options',
 	  views: {
 	    'menuContent': {
-		templateUrl: 'templates/options.html'
+		templateUrl: 'templates/options.html', 
+    controller: 'OptionsController'
 	    }
 	  },
 	  onEnter: function($state, auth){
