@@ -1,6 +1,24 @@
 <ion-view view-title="Messages">
   <ion-content>
     <div class="list">
+      <div class="item item-input-inset">
+        <label class="item-input-wrapper">
+          <input type="text" placeholder="Write message..." ng-model="newMessage.message">
+        </label>
+        <button class="button button-small" ng-click="sendMessage()">
+          Send
+        </button>
+      </div>
+      <div ng-show="newMessage">
+        <a class="item item-avatar-right" href="#">
+          <!-- imagen -->
+          <img ng-src="{{ ApiUrl }}/img/avatar-placeholder.png" />
+          <img ng-src="{{ ApiUrl }}/pictures/{{ newMessage.pic }}" ng-if="newMessage.pic!==undefined && newMessage.pic.indexOf('https://') === -1 && newMessage.pic" />
+          <img ng-src="{{ newMessage.pic }}" ng-if="newMessage.pic!==undefined && newMessage.pic.indexOf('https://') !== -1"/>
+          <h2 class="text-right">Me</h2>
+          <p class="text-right">{{newMessage.message}}</p>
+        </a>
+      </div>
       <div ng-repeat="message in chats | orderBy : '-dateSent'"">
         <a class="item item-avatar" href="#" ng-hide="message.mymessage">
           <!-- imagen -->
@@ -15,7 +33,7 @@
         <img ng-src="{{ ApiUrl }}/img/avatar-placeholder.png" ng-if="!message.pic" />
         <img ng-src="{{ ApiUrl }}/pictures/{{ message.pic }}" ng-if="message.pic!==undefined && message.pic.indexOf('https://') === -1 && message.pic" />
         <img ng-src="{{ message.pic }}" ng-if="message.pic!==undefined && message.pic.indexOf('https://') !== -1"/>
-        <h2 class="text-right">Yo</h2>
+        <h2 class="text-right">Me</h2>
         <p class="text-right">{{message.message}}</p>
       </a>
     </div>

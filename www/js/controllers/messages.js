@@ -65,10 +65,12 @@
 		// /profile/:id
 	});
 
-  app.controller('WriteMessageController', function($scope, $http, ApiData, auth, $stateParams) {
+  app.controller('WriteMessageController', function($scope, $http, ApiData, auth, $stateParams, MessagesService, $ionicLoading, $window) {
 
 
     $scope.chat = {};
+    $scope.newMessage = {};
+
 
     auth.getUser().then(function successCallback(response) {
       var user = response.data;
@@ -78,7 +80,18 @@
       }).then(function(response) {
         $scope.chats = response.data;
 
-
+        if($scope.chats){
+          $scope.newMessage.cid = $scope.chats[0].cid;
+          $scope.newMessage.uid1 = $scope.chats[0].uid1._id;
+          $scope.newMessage.uid2 = $scope.chats[0].uid2._id;
+          if($scope.chats[0].uid1._id == user._id){
+            $scope.newMessage.From = $scope.chats[0].uid1._id;
+            $scope.newMessage.To = $scope.chats[0].uid2._id;
+          }else{
+            $scope.newMessage.From = $scope.chats[0].uid2._id;
+            $scope.newMessage.To = $scope.chats[0].uid1._id;
+          }
+        }
 
         //Elegir picture
         angular.forEach($scope.chats, function(value, key) {
@@ -133,6 +146,26 @@
       });
 
     });
+
+
+    $scope.sendMessage = function(){
+
+      /*$ionicLoading.show({
+        template: 'Please wait...'
+      });*/
+      console.log('este es el mensaje  q se enviiiaa::');
+      console.log($scope.newMessage);
+
+        MessagesService.newmessage($scope.newMessage).error(function(data){
+        $scope.error = data;
+        $scope.showAlert('Error', $scope.error.message);
+      }).then(function successCallback(response){
+        data = response.data;
+        $window.location.reload(true);
+        //$scope.user = {};
+      });
+
+    };
 
 
   });
