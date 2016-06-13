@@ -26,7 +26,7 @@ angular.module('meetabroad', ['ionic', 'meetabroad.controllers', 'jett.ionic.fil
 
   .factory('ApiData', function() {
     return {
-      url : 'http://147.83.7.163:3000'
+      url : 'http://localhost:3000'
     };
   })
 
@@ -47,6 +47,19 @@ angular.module('meetabroad', ['ionic', 'meetabroad.controllers', 'jett.ionic.fil
     };
 
     return notifications;
+  })
+
+  .factory('MessagesService', function($http, ApiData) {
+
+    var MessagesService = {};
+    MessagesService.newmessage = function(message){
+      return $http.post(ApiData.url+'/messages/message', message).success(function(data){
+        console.log('test');
+      });
+    };
+
+    return MessagesService;
+
   })
 
   .factory('auth', function($http, $window, $location, ApiData){
