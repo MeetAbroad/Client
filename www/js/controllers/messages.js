@@ -3,68 +3,73 @@
 
 	app.controller('MessageController', function($scope, $http, ApiData, auth, $ionicFilterBar) {
 
-		$scope.listmessages = [];
+    $scope.$on('$ionicView.enter', function(e) {
+      $scope.listmessages = [];
 
-		$scope.showFilterBar = function () {
-		  var filterBarInstance = $ionicFilterBar.show({
-			cancelText: "<i class='ion-ios-close-outline'></i>",
-			items: $scope.listmessages,
-			update: function (filteredItems, filterText) {
-			  $scope.listmessages = filteredItems;
-			}
-		  });
-		};
+      auth.getUser().then(function successCallback(response) {
+        var user = response.data;
 
-		auth.getUser().then(function successCallback(response) {
-		  var user = response.data;
+        $http.get(ApiData.url+'/messages/list/'+user._id, {
+          headers: {Authorization: 'Bearer '+auth.getToken()}
+        }).then(function(response) {
+          data = response.data;
+          $scope.listmessages = data;
+          console.log(data);
+          //Elegir picture
+          angular.forEach($scope.listmessages, function(value, key) {
 
-		  $http.get(ApiData.url+'/messages/list/'+user._id, {
-			headers: {Authorization: 'Bearer '+auth.getToken()}
-		  }).then(function(response) {
-			data = response.data;
-        $scope.listmessages = data;
-        console.log(data);
-        //Elegir picture
-        angular.forEach($scope.listmessages, function(value, key) {
+            if(value.uid1._id != user._id)
+            {
 
-          if(value.uid1._id != user._id)
-          {
+              value.name = value.uid1.firstname + ' ' + value.uid1.lastname;
+              console.log("genero el ruben emilio luca desde 1");
+              if(value.uid1.picture)
+                value.pic = value.uid1.picture;
+              else
+                value.pic = '';
 
-            value.name = value.uid1.firstname + ' ' + value.uid1.lastname;
-            console.log("genero el ruben emilio luca desde 1");
-            if(value.uid1.picture)
-              value.pic = value.uid1.picture;
+            }
             else
-              value.pic = '';
+            {
 
-          }
-          else
-          {
+              value.name = value.uid2.firstname + ' ' + value.uid2.lastname;
+              console.log("genero el ruben emilio luca desde 2");
 
-            value.name = value.uid2.firstname + ' ' + value.uid2.lastname;
-            console.log("genero el ruben emilio luca desde 2");
+              if(value.uid2.picture)
+                value.pic = value.uid2.picture;
+              else
+                value.pic = '';
 
-            if(value.uid2.picture)
-             value.pic = value.uid2.picture;
-            else
-              value.pic = '';
+            }
 
-          }
+          });
 
+        }, function(data){
+          $scope.error = data;
+          $scope.showAlert('No messages found', $scope.error.message);
+          console.log('da error');
+          $scope.listmessages = [];
         });
 
-		  }, function(data){
-        $scope.error = data;
-        $scope.showAlert('Error', $scope.error.message);
-        console.log('da error');
-  			$scope.listmessages = [];
-		  });
+      });
+    });
 
-		});
+
+
+
+    $scope.showFilterBar = function () {
+      var filterBarInstance = $ionicFilterBar.show({
+        cancelText: "<i class='ion-ios-close-outline'></i>",
+        items: $scope.listmessages,
+        update: function (filteredItems, filterText) {
+          $scope.listmessages = filteredItems;
+        }
+      });
+    };
 
 	});
 
-  app.controller('WriteMessageController', function($scope, $http, ApiData, auth, $stateParams, MessagesService, $ionicLoading, $window) {
+  app.controller('WriteMessageController', function($scope, $http, ApiData, auth, $stateParams, MessagesService, $ionicLoading, $window, $location) {
 
 
     $scope.chat = {};
@@ -191,19 +196,14 @@
 
     $scope.sendMessage = function(){
 
-      /*$ionicLoading.show({
-        template: 'Please wait...'
-      });*/
       console.log('este es el mensaje  q se enviiiaa::');
       console.log($scope.newMessage);
 
-        MessagesService.newmessage($scope.newMessage).error(function(data){
-        $scope.error = data;
-        $scope.showAlert('Error', $scope.error.message);
-      }).then(function successCallback(response){
+        MessagesService.newmessage($scope.newMessage).then(function successCallback(response){
         data = response.data;
+          $scope.newMessage.message = '';
+          console.log('ha io...')
           $window.location.reload(true);
-        //$scope.user = {};
       });
 
     };

@@ -49,12 +49,12 @@ angular.module('meetabroad', ['ionic', 'meetabroad.controllers', 'jett.ionic.fil
     return notifications;
   })
 
-  .factory('MessagesService', function($http, ApiData, $window, $location) {
+  .factory('MessagesService', function($http, ApiData, $window, $state) {
 
     var MessagesService = {};
     MessagesService.newmessage = function(message){
       return $http.post(ApiData.url+'/messages/message', message).success(function(data){
-        $window.location.reload(true);
+        console.log('Esty en newmessages');
       });
     };
 
