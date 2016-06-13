@@ -26,7 +26,7 @@ angular.module('meetabroad', ['ionic', 'meetabroad.controllers', 'jett.ionic.fil
 
 .factory('ApiData', function() {
 	return {
-		url : 'http://localhost:3000'
+		url : 'http://147.83.7.163:3000'
 	};
 })
 

@@ -18,6 +18,7 @@ Change it.
 You can run it on a web browser using `ionic serve`.
 To test it using the Android emulator (assuming you have the emulator setup):
 ```
+cordova plugins add cordova-plugin-inappbrowser
 ionic platform android
 ionic build android
 ionic emulate android
