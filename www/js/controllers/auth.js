@@ -40,17 +40,17 @@
 								$window.location.reload(true);
 							}).error(function(data){
 								$ionicLoading.hide();
-								$scope.showAlert('Error', data);
+								$scope.showAlert('Facebook Error 1', data);
 							});
 						},
 						function (error) {
 							$ionicLoading.hide();
-							$scope.showAlert('Facebook Error', error.error_description);
+							$scope.showAlert('Facebook Error 2', error.error_description);
 						}
 					);
 				} else {
 					$ionicLoading.hide();
-					$scope.showAlert('Facebook Error', 'Facebook login failed');
+					$scope.showAlert('Facebook Error 3', 'Facebook login failed');
 				}
 			});
 		};
