@@ -2,7 +2,6 @@
 	var app = angular.module('meetabroad.controllers');
 
 	app.controller('MessageController', function($scope, $http, ApiData, auth, $ionicFilterBar) {
-		//$scope.places = [{name:'New York'}, {name: 'London'}, {name: 'Milan'}, {name:'Paris'}];
 
 		$scope.listmessages = [];
 
@@ -32,7 +31,7 @@
           {
 
             value.name = value.uid1.firstname + ' ' + value.uid1.lastname;
-
+            console.log("genero el ruben emilio luca desde 1");
             if(value.uid1.picture)
               value.pic = value.uid1.picture;
             else
@@ -43,6 +42,7 @@
           {
 
             value.name = value.uid2.firstname + ' ' + value.uid2.lastname;
+            console.log("genero el ruben emilio luca desde 2");
 
             if(value.uid2.picture)
              value.pic = value.uid2.picture;
@@ -62,7 +62,6 @@
 
 		});
 
-		// /profile/:id
 	});
 
   app.controller('WriteMessageController', function($scope, $http, ApiData, auth, $stateParams, MessagesService, $ionicLoading, $window) {
@@ -96,12 +95,10 @@
         //Elegir picture
         angular.forEach($scope.chats, function(value, key) {
 
-          if(value.uid1._id != user._id)
+          /*if(value.uid1._id != user._id)
           {
 
             value.name = value.uid1.firstname + ' ' + value.uid1.lastname;
-
-
 
             if(value.uid1.picture)
               value.pic = value.uid1.picture;
@@ -119,17 +116,61 @@
             else
               value.pic = '';
 
-          }
+          }*/
 
           if(value.From != user._id)
           {
               value.mymessage = false;
+
+            if(value.uid1._id != user._id)
+            {
+              value.name = value.uid1.firstname + ' ' + value.uid1.lastname;
+
+              if(value.uid1.picture)
+                value.pic = value.uid1.picture;
+              else
+                value.pic = '';
+
+            }
+            else
+            {
+
+              value.name = value.uid2.firstname + ' ' + value.uid2.lastname;
+
+              if(value.uid2.picture)
+                value.pic = value.uid2.picture;
+              else
+                value.pic = '';
+
+            }
 
           }
           else
           {
 
               value.mymessage = true;
+
+            if(value.uid1._id != user._id)
+            {
+              value.name = value.uid2.firstname + ' ' + value.uid2.lastname;
+
+              if(value.uid2.picture)
+                value.pic = value.uid2.picture;
+              else
+                value.pic = '';
+
+            }
+            else
+            {
+
+              value.name = value.uid1.firstname + ' ' + value.uid1.lastname;
+
+              if(value.uid1.picture)
+                value.pic = value.uid1.picture;
+              else
+                value.pic = '';
+
+            }
 
           }
 
@@ -161,7 +202,7 @@
         $scope.showAlert('Error', $scope.error.message);
       }).then(function successCallback(response){
         data = response.data;
-        $window.location.reload(true);
+          $window.location.reload(true);
         //$scope.user = {};
       });
 
@@ -169,5 +210,32 @@
 
 
   });
+
+  app.controller('WriteNewMessageController', function($scope, $http, ApiData, auth, $stateParams, MessagesService, $ionicLoading, $window) {
+
+    $scope.newMessageTo = {};
+
+    auth.getUser().then(function successCallback(response) {
+      var user = response.data;
+      //$http.get(ApiData.url+'/messages/mine/'+user._id+'/'+ $stateParams.id, {
+      $scope.newMessageTo.uid1 = user._id;
+      $scope.newMessageTo.uid2 = $stateParams.id;
+    });
+
+    $scope.sendMessag = function(){
+
+      MessagesService.newmessageto($scope.newMessageTo).error(function(data){
+        $scope.error = data;
+        $scope.showAlert('Error', $scope.error.message);
+      }).then(function (){
+        $window.location.reload(true);
+        $scope.newMessageTo = {};
+      });
+
+    };
+
+
+  });
+
 
 })();

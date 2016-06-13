@@ -16,7 +16,7 @@
         <p><i class="ion-home"></i> {{ connection.origincountry }} - {{ connection.origincity }}</p>
         <p><i class="ion-plane"></i> {{ connection.destinationcountry }} - {{ connection.destinationcity }}</p>
         <ion-option-button class="button-assertive icon-left ion-trash-b" ng-click="deleteConnection(connection.connectionid);">Delete</ion-option-button>
-        <a class="button button-small left ion-ios-compose-outline button-positive"> Write message</a>
+        <a ng-click="newM(connection._id)" class="button button-small left ion-ios-compose-outline button-positive"> Write message</a>
       </ion-item>
       <ion-item ng-if="connections.length===0">
         You have no connections.

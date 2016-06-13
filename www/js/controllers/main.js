@@ -26,6 +26,10 @@
         $state.go('app.writemessage',{id: id});
       };
 
+      $scope.newM = function(id) {
+        $state.go('app.newmessage',{id: id});
+      };
+
 			$scope.refreshNotifications = function() {
 			NotificationService.load().then(function (response) {
 				$scope.notifications = response;

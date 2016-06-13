@@ -49,12 +49,18 @@ angular.module('meetabroad', ['ionic', 'meetabroad.controllers', 'jett.ionic.fil
     return notifications;
   })
 
-  .factory('MessagesService', function($http, ApiData) {
+  .factory('MessagesService', function($http, ApiData, $window, $location) {
 
     var MessagesService = {};
     MessagesService.newmessage = function(message){
       return $http.post(ApiData.url+'/messages/message', message).success(function(data){
-        console.log('test');
+        $window.location.reload(true);
+      });
+    };
+
+    MessagesService.newmessageto = function(message){
+      return $http.post(ApiData.url+'/messages/newmessage', message).success(function(data){
+        $window.location.reload(true);
       });
     };
 
@@ -177,6 +183,20 @@ angular.module('meetabroad', ['ionic', 'meetabroad.controllers', 'jett.ionic.fil
           'menuContent': {
             templateUrl: 'templates/messages/write-message.html',
             controller: 'WriteMessageController'
+          }
+        },
+        onEnter: function($state, auth){
+          if(!auth.isLoggedIn())
+            $state.go('app.login');
+        }
+      })
+
+      .state('app.newmessage', {
+        url: '/newmessage/:id',
+        views: {
+          'menuContent': {
+            templateUrl: 'templates/messages/new-message.html',
+            controller: 'WriteNewMessageController'
           }
         },
         onEnter: function($state, auth){

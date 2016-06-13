@@ -1,0 +1,19 @@
+<ion-view view-title="New Message">
+  <ion-content>
+    <div class="list">
+      <div class="item item-input-inset">
+        <label class="item-input-wrapper">
+          <input type="text" placeholder="Write message..." ng-model="newMessageTo.message">
+        </label>
+        <button class="button button-small" ng-click="sendMessag()">
+          Send
+        </button>
+      </div>
+      <div ng-show="newMessageTo">
+        <a class="item item-avatar" href="#">
+          <h2 class="text">Message:</h2>
+          <p class="text">{{newMessageTo.message}}</p>
+        </a>
+      </div>
+  </ion-content>
+</ion-view>
