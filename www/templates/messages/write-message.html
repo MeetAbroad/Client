@@ -10,22 +10,22 @@
         </button>
       </div>
       <div ng-repeat="message in chats | orderBy : '-dateSent'"">
-        <a class="item item-avatar" href="#" ng-hide="message.mymessage">
+        <div class="item item-avatar item-text-wrap" href="#" ng-hide="message.mymessage">
           <!-- imagen -->
           <img ng-src="{{ ApiUrl }}/img/avatar-placeholder.png" ng-if="!message.pic" />
           <img ng-src="{{ ApiUrl }}/pictures/{{ message.pic }}" ng-if="message.pic!==undefined && message.pic.indexOf('https://') === -1 && message.pic" />
           <img ng-src="{{ message.pic }}" ng-if="message.pic!==undefined && message.pic.indexOf('https://') !== -1"/>
           <h2>{{message.name}}</h2>
           <p>{{message.message}}</p>
-        </a>
-      <a class="item item-avatar-right" href="#" ng-hide="!message.mymessage">
+        </div>
+      <div class="item item-avatar-right item-text-wrap" href="#" ng-hide="!message.mymessage">
         <!-- imagen -->
         <img ng-src="{{ ApiUrl }}/img/avatar-placeholder.png" ng-if="!message.pic" />
         <img ng-src="{{ ApiUrl }}/pictures/{{ message.pic }}" ng-if="message.pic!==undefined && message.pic.indexOf('https://') === -1 && message.pic" />
         <img ng-src="{{ message.pic }}" ng-if="message.pic!==undefined && message.pic.indexOf('https://') !== -1"/>
         <h2 class="text-right">Me</h2>
         <p class="text-right">{{message.message}}</p>
-      </a>
+      </div>
     </div>
   </ion-content>
 </ion-view>
