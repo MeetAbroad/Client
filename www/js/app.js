@@ -53,15 +53,11 @@ angular.module('meetabroad', ['ionic', 'meetabroad.controllers', 'jett.ionic.fil
 
     var MessagesService = {};
     MessagesService.newmessage = function(message){
-      return $http.post(ApiData.url+'/messages/message', message).success(function(data){
-        console.log('Esty en newmessages');
-      });
+      return $http.post(ApiData.url+'/messages/message', message)
     };
 
     MessagesService.newmessageto = function(message){
-      return $http.post(ApiData.url+'/messages/newmessage', message).success(function(data){
-        $window.location.reload(true);
-      });
+      return $http.post(ApiData.url+'/messages/newmessage', message)
     };
 
     return MessagesService;

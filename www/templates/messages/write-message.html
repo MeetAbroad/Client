@@ -9,16 +9,6 @@
           Send
         </button>
       </div>
-      <div ng-show="newMessage">
-        <a class="item item-avatar-right" href="#">
-          <!-- imagen -->
-          <img ng-src="{{ ApiUrl }}/img/avatar-placeholder.png" />
-          <img ng-src="{{ ApiUrl }}/pictures/{{ newMessage.pic }}" ng-if="newMessage.pic!==undefined && newMessage.pic.indexOf('https://') === -1 && newMessage.pic" />
-          <img ng-src="{{ newMessage.pic }}" ng-if="newMessage.pic!==undefined && newMessage.pic.indexOf('https://') !== -1"/>
-          <h2 class="text-right">Me</h2>
-          <p class="text-right">{{newMessage.message}}</p>
-        </a>
-      </div>
       <div ng-repeat="message in chats | orderBy : '-dateSent'"">
         <a class="item item-avatar" href="#" ng-hide="message.mymessage">
           <!-- imagen -->
